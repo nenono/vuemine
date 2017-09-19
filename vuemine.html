@@ -95,11 +95,11 @@
          });
          Vue.component('story-item', {
              props: ['story'],
-             template: '<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a> <span v-bind:class="\'story-status \' + story.status">({{ story.status }})</span> <span class="story-title">{{ story.title }}</span><br /><task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" /></div>'
+             template: '<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a> <span v-bind:class="\'story-status \' + story.status">({{ story.status }})</span> <span v-bind:class="\'story-title \' + story.status">{{ story.title }}</span><br /><task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" /></div>'
          });
          Vue.component('task-item', {
              props: ['task'],
-             template: '<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a> <span v-bind:class="\'task-status \' + task.status">({{ task.status }})</span> <span class="task-title">{{ task.title }}</span></div>'
+             template: '<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a> <span v-bind:class="\'task-status \' + task.status">({{ task.status }})</span> <span v-bind:class="\'task-title \' + task.status">{{ task.title }}</span></div>'
          });
 
          let projects = new Vue({
