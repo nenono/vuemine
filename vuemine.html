@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Vuemine - Redmine Backlog Viewer</title>
+        <style type="text/css">
+         <!--
+         /* base colors */
+         body { background-color: #222222; color: #EEEEEE }
+         a { color: #9999DD  }
+         a:hover{ color: #AAAAFF }
+
+         /* layouts */
+         dl { display: inline; margin: 0px; }
+         dt { display: inline; margin: 0px; }
+         dd { display: inline; margin: 0px; }
+         div#projects { margin-top: 20px; }
+         div.project { border-color: #888888; border-style: solid; border-width: 1px; width: 33%; float: left }
+         div.story { margin-left:5px; }
+         div.task { margin-left: 10px; }
+
+         /* layouts in items */
+         .story-number, .task-number { font-size: 0.8em; }
+         .story-status, .task-status { font-size: 0.8em; }
+         .story-title, .task-title { display: inline-block }
+         .sprint-term { font-size: 0.5em }
+
+         /* status colors */
+         .running { color: #FFAAAA }
+         .review, .feedback { color: #DD9999 }
+         .done, .reject { color: #888888 }
+         -->
+        </style>
+    </head>
+    <body>
+        <script type="text/javascript" src="vue.js"></script>
+        <script type="text/javascript" src="axios.js"></script>
+        <script type="text/javascript" src="vuemine.js"></script>
+        <div id="settings">
+            <dl>
+                <dt>redmine url</dt><dd><input type="text" v-model="root_url" /></dd>
+                <dt>project ids(separated with ',')</dt><dd><input type="text" v-model="project_ids" /></dd>
+                <dt>api key</dt><dd><input type="text" v-model="api_key" /></dd>
+            </dl>
+            <button v-on:click="show">show</button>
+        </div>
+        <div id="projects">
+            <project-item v-for="x in projects" v-bind:project="x" :key="x.id" />
+        </div>
+
+        <script type="text/javascript">
+         let settings = new Vue({
+             el: '#settings',
+             data: parse_query(window.location.search),
+             methods: {
+                 show: function(){
+                     window.location.search = 'root_url=' + this.root_url + '&project_ids=' + this.project_ids + '&api_key=' + this.api_key;
+                 }
+             }
+         });
+
+         Vue.component('project-item', {
+             props: ['project'],
+             template: '<div class="project"><a v-bind:href="project.url"><span class="project-title">{{ project.title }}</span></a><br /><sprint-item v-for="x in project.sprints" v-bind:sprint="x" :key="x.id" /></div>',
+             methods:{
+                 load: function(){
+                     let self = this;
+                     fetch_project(settings.api_key, settings.root_url, this.project.id, function(title){
+                         self.project.title = title;
+                     });
+                     fetch_sprints(settings.api_key, settings.root_url, this.project.id, function(sprints){
+                         self.project.sprints = sprints;
+                     });
+                 }
+             },
+             mounted: function(){
+                 this.load();
+             }
+         });
+
+         Vue.component('sprint-item', {
+             props: ['sprint'],
+             template: '<div class="sprint"><span class="sprint-term">{{ sprint.start.toLocaleDateString() }} -&gt; {{ sprint.end.toLocaleDateString() }}</span> <span class="sprint-title">{{ sprint.title }}</span><br /><story-item v-for="x in sprint.stories" v-bind:story="x" :key="x.id" /></div>',
+             methods:{
+                 load: function(){
+                     let self = this;
+                     fetch_stories(settings.api_key, settings.root_url, self.$parent.project.id, self.sprint.id, function(stories){
+                         self.sprint.stories = stories;
+                     });
+                 }
+             },
+             mounted: function(){
+                 this.load();
+             }
+         });
+         Vue.component('story-item', {
+             props: ['story'],
+             template: '<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a> <span v-bind:class="\'story-status \' + story.status">({{ story.status }})</span> <span class="story-title">{{ story.title }}</span><br /><task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" /></div>'
+         });
+         Vue.component('task-item', {
+             props: ['task'],
+             template: '<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a> <span v-bind:class="\'task-status \' + task.status">({{ task.status }})</span> <span class="task-title">{{ task.title }}</span></div>'
+         });
+
+         let projects = new Vue({
+             el: '#projects',
+             data: { projects: [] }
+         });
+
+         if(settings.root_url && settings.project_ids && settings.api_key){
+             projects.projects = build_projects(settings.root_url, settings.project_ids);
+         }
+        </script>
+    </body>
+</html>
