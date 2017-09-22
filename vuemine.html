@@ -9,6 +9,7 @@
          body { background-color: #222222; color: #EEEEEE }
          a { color: #9999DD  }
          a:hover{ color: #AAAAFF }
+         button{ background-color: #666666; color: #EEEEEE ; border-style: none;}
 
          /* layouts */
          dl { display: inline; margin: 0px; }
@@ -102,7 +103,23 @@
          });
          Vue.component('task-item', {
              props: ['task'],
-             template: '<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a> <span v-bind:class="\'task-status \' + task.status">({{ task.status }})</span> <span v-bind:class="\'task-title \' + task.status">{{ task.title }}</span></div>'
+             methods: {
+                 start: function(task_id) {
+                     console.log('task.start');
+                     console.log(task_id);
+                 },
+                 done: function(task_id) {
+                     console.log('task.done');
+                     console.log(task_id);
+                 }
+             },
+             template: `<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
+                 <span v-bind:class="\'task-status \' + task.status">({{ task.status }})</span>
+                 <template v-if="task.is_startable"><button v-on:click="start(task.id)">start</button></template>
+                 <template v-else-if="task.is_doneable"><button v-on:click="done(task.id)">done</button></template>
+                 <template v-else></template>
+                 <span v-bind:class="\'task-title \' + task.status">{{ task.title }}</span>
+             </div>`
          });
 
          let projects = new Vue({

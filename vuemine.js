@@ -152,14 +152,37 @@ function convert_status(japanese_name){
     }
 }
 
+function issue_is_startable(status){
+    switch(status){
+    case 'new':
+        return true;
+    default:
+        return false;
+    }
+}
+
+function issue_is_doneable(status){
+    switch(status){
+    case 'running':
+    case 'review':
+    case 'feedback':
+        return true;
+    default:
+        return false;
+    }
+}
+
 function issue_json_to_task_or_story(root_url, issue){
+    let status = convert_status(issue.status.name);
     return {
         id: issue.id,
         number: issue.id,
         title: issue.subject,
-        status: convert_status(issue.status.name),
+        status: status,
         url: build_issue_url(root_url, issue.id),
-        parent_id: issue.parent ? issue.parent.id : null
+        parent_id: issue.parent ? issue.parent.id : null,
+        is_startable: issue_is_startable(status),
+        is_doneable: issue_is_doneable(status)
     };
 }
 
