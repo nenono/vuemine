@@ -143,6 +143,19 @@ function build_issue_url(api_key, root_url, issue_id){
     return `${build_issue_page_url(root_url, issue_id)}.json?key=${api_key}`;
 }
 
+function build_current_user_url(api_key, root_url){
+    return `${root_url}users/current.json?key=${api_key}`;
+}
+
+function fetch_current_user(settings, callback) {
+    let url = build_current_user_url(settings.api_key, settings.root_url);
+    axios.get(url).then(response => {
+        console.log('user');
+        console.log(response);
+        callback(response.data.user);
+    });
+};
+
 function convert_status(status){
     let translated = ((japanese_name) => {
         switch(japanese_name){
@@ -184,13 +197,8 @@ function issue_is_doneable(status){
     }
 }
 
-function update_issue(settings, issue, new_status){
+function update_issue(settings, issue, new_status, body){
     let url = build_issue_url(settings.api_key, settings.root_url, issue.id);
-    let body = {
-        'issue': {
-            'status_id': new_status.id
-        }
-    };
     axios.put(url, body).then(response => {
         console.log('issue updated.');
         console.log(response);
@@ -198,16 +206,29 @@ function update_issue(settings, issue, new_status){
     });
 }
 
-function issue_start(issue, settings){
+function issue_start_with_assign_to_me(issue, settings){
     console.log('issue start');
     console.log(issue);
-    update_issue(settings, issue, statuses.running);
+    fetch_current_user(settings, (user) => {
+        let body = {
+            'issue': {
+                'status_id': statuses.running.id,
+                'assigned_to_id': user.id
+            }
+        };
+        update_issue(settings, issue, statuses.running, body);
+    });
 }
 
 function issue_done(issue, settings){
     console.log('issue done');
     console.log(issue);
-    update_issue(settings, issue, statuses.done);
+    let body = {
+        'issue': {
+            'status_id': statuses.done.id
+        }
+    };
+    update_issue(settings, issue, statuses.done, body);
 }
 
 function issue_json_to_task_or_story(root_url, issue){
@@ -221,7 +242,7 @@ function issue_json_to_task_or_story(root_url, issue){
         parent_id: issue.parent ? issue.parent.id : null,
         is_startable: function(){ return issue_is_startable(self.status); },
         is_doneable: function(){ return issue_is_doneable(self.status); },
-        start: function(settings){ issue_start(this, settings); },
+        start: function(settings){ issue_start_with_assign_to_me(this, settings); },
         done: function(settings){ issue_done(this, settings); }
     };
     return self;
