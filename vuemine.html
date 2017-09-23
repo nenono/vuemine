@@ -104,13 +104,15 @@
          Vue.component('task-item', {
              props: ['task'],
              methods: {
-                 start: function(task_id) {
+                 start: function(task) {
                      console.log('task.start');
-                     console.log(task_id);
+                     console.log(task.id);
+                     task.start(settings);
                  },
-                 done: function(task_id) {
+                 done: function(task) {
                      console.log('task.done');
-                     console.log(task_id);
+                     console.log(task.id);
+                     task.done(settings);
                  }
              },
              template: `<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>

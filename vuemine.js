@@ -92,6 +92,10 @@ let stub = {
             ]}]};
 
 
+let statuses = {
+    'running': {'id': 2, 'name': 'running', 'label': '進行中'},
+    'done': {'id': 5, 'name': 'done', 'label': '終了'}
+};
 
 function parse_query(query){
     // TODO: query stringのparseをもうすこしまともにする
@@ -135,6 +139,9 @@ function build_issue_page_url(root_url, issue_id){
     return `${root_url}issues/${issue_id}`;
 }
 
+function build_issue_url(api_key, root_url, issue_id){
+    return `${build_issue_page_url(root_url, issue_id)}.json?key=${api_key}`;
+}
 
 function convert_status(status){
     let translated = ((japanese_name) => {
@@ -177,34 +184,30 @@ function issue_is_doneable(status){
     }
 }
 
-function update_issue(settings, issue, request_body){
-    let url = build_issue_url(settings.root_url, issue.id) + '.json';
-    axios.put(url, request_body).then(response => {
+function update_issue(settings, issue, new_status){
+    let url = build_issue_url(settings.api_key, settings.root_url, issue.id);
+    let body = {
+        'issue': {
+            'status_id': new_status.id
+        }
+    };
+    axios.put(url, body).then(response => {
         console.log('issue updated.');
         console.log(response);
+        issue.status = new_status;
     });
 }
 
 function issue_start(issue, settings){
     console.log('issue start');
     console.log(issue);
-    let body = {
-        'issue': {
-            'status_id': issue.status.id + 1
-        }
-    };
-    update_issue(settings, issue, body);
+    update_issue(settings, issue, statuses.running);
 }
 
 function issue_done(issue, settings){
     console.log('issue done');
     console.log(issue);
-    let body = {
-        'issue': {
-            'status_id': 5
-        }
-    };
-    update_issue(settings, issue, body);
+    update_issue(settings, issue, statuses.done);
 }
 
 function issue_json_to_task_or_story(root_url, issue){
@@ -214,10 +217,12 @@ function issue_json_to_task_or_story(root_url, issue){
         number: issue.id,
         title: issue.subject,
         status: status,
-        url: build_issue_url(root_url, issue.id),
+        url: build_issue_page_url(root_url, issue.id),
         parent_id: issue.parent ? issue.parent.id : null,
         is_startable: issue_is_startable(status),
-        is_doneable: issue_is_doneable(status)
+        is_doneable: issue_is_doneable(status),
+        start: function(settings){ issue_start(this, settings); },
+        done: function(settings){ issue_done(this, settings); }
     };
 }
 
