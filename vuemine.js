@@ -92,6 +92,10 @@ let stub = {
             ]}]};
 
 
+let statuses = {
+    'running': {'id': 2, 'name': 'running', 'label': '進行中'},
+    'done': {'id': 5, 'name': 'done', 'label': '終了'}
+};
 
 function parse_query(query){
     // TODO: query stringのparseをもうすこしまともにする
@@ -123,7 +127,7 @@ function build_tasks_url(api_key, root_url, project_id, sprint_id ){
     return `${root_url}projects/${project_id}/issues.json?key=${api_key}&limit=100&backlogs_issue_type=task&fixed_version_id=${sprint_id}&status_id=*`;
 }
 
-function build_backlog_url(root_url, project_id){
+function build_backlog_page_url(root_url, project_id){
     return `${root_url}rb/master_backlog/${project_id}`;
 }
 
@@ -131,36 +135,117 @@ function build_project_url(api_key, root_url, project_id){
     return `${root_url}projects/${project_id}.json?key=${api_key}`;
 }
 
-function build_issue_url(root_url, issue_id){
+function build_issue_page_url(root_url, issue_id){
     return `${root_url}issues/${issue_id}`;
 }
 
-function convert_status(japanese_name){
-    switch(japanese_name){
-    case '新規':
-        return "new";
-    case '進行中':
-        return "running";
-    case 'レビュー':
-        return "review";
-    case 'フィードバック':
-        return "feedback";
-    case '終了':
-        return "done";
-    case '却下':
-        return "reject";
+function build_issue_url(api_key, root_url, issue_id){
+    return `${build_issue_page_url(root_url, issue_id)}.json?key=${api_key}`;
+}
+
+function build_current_user_url(api_key, root_url){
+    return `${root_url}users/current.json?key=${api_key}`;
+}
+
+function fetch_current_user(settings, callback) {
+    let url = build_current_user_url(settings.api_key, settings.root_url);
+    axios.get(url).then(response => {
+        console.log('user');
+        console.log(response);
+        callback(response.data.user);
+    });
+};
+
+function convert_status(status){
+    let translated = ((japanese_name) => {
+        switch(japanese_name){
+        case '新規':
+            return "new";
+        case '進行中':
+            return "running";
+        case 'レビュー':
+            return "review";
+        case 'フィードバック':
+            return "feedback";
+        case '終了':
+            return "done";
+        case '却下':
+            return "reject";
+        default:
+            return "";
+        }})(status.name);
+    return { 'id': status.id, 'name': translated, 'label': status.name };
+}
+
+function issue_is_startable(status){
+    switch(status.name){
+    case 'new':
+        return true;
+    default:
+        return false;
     }
 }
 
+function issue_is_doneable(status){
+    switch(status.name){
+    case 'running':
+    case 'review':
+    case 'feedback':
+        return true;
+    default:
+        return false;
+    }
+}
+
+function update_issue(settings, issue, new_status, body){
+    let url = build_issue_url(settings.api_key, settings.root_url, issue.id);
+    axios.put(url, body).then(response => {
+        console.log('issue updated.');
+        console.log(response);
+        issue.status = new_status;
+    });
+}
+
+function issue_start_with_assign_to_me(issue, settings){
+    console.log('issue start');
+    console.log(issue);
+    fetch_current_user(settings, (user) => {
+        let body = {
+            'issue': {
+                'status_id': statuses.running.id,
+                'assigned_to_id': user.id
+            }
+        };
+        update_issue(settings, issue, statuses.running, body);
+    });
+}
+
+function issue_done(issue, settings){
+    console.log('issue done');
+    console.log(issue);
+    let body = {
+        'issue': {
+            'status_id': statuses.done.id
+        }
+    };
+    update_issue(settings, issue, statuses.done, body);
+}
+
 function issue_json_to_task_or_story(root_url, issue){
-    return {
+    let status = convert_status(issue.status);
+    let self = {
         id: issue.id,
         number: issue.id,
         title: issue.subject,
-        status: convert_status(issue.status.name),
-        url: build_issue_url(root_url, issue.id),
-        parent_id: issue.parent ? issue.parent.id : null
+        status: status,
+        url: build_issue_page_url(root_url, issue.id),
+        parent_id: issue.parent ? issue.parent.id : null,
+        is_startable: function(){ return issue_is_startable(self.status); },
+        is_doneable: function(){ return issue_is_doneable(self.status); },
+        start: function(settings){ issue_start_with_assign_to_me(this, settings); },
+        done: function(settings){ issue_done(this, settings); }
     };
+    return self;
 }
 
 function group_tasks_by_story(stories, tasks){
@@ -177,9 +262,9 @@ function group_tasks_by_story(stories, tasks){
     });
 }
 
-function fetch_stories(api_key, root_url, project_id, sprint_id, callback){
-    let stories_url = build_stories_url(api_key, root_url, project_id, sprint_id);
-    let tasks_url = build_tasks_url(api_key, root_url, project_id, sprint_id);
+function fetch_stories(settings, project_id, sprint_id, callback){
+    let stories_url = build_stories_url(settings.api_key, settings.root_url, project_id, sprint_id);
+    let tasks_url = build_tasks_url(settings.api_key, settings.root_url, project_id, sprint_id);
     axios.all([
         axios.get(stories_url),
         axios.get(tasks_url)])
@@ -188,15 +273,15 @@ function fetch_stories(api_key, root_url, project_id, sprint_id, callback){
             console.log(res_stories);
             console.log("tasks");
             console.log(res_tasks);
-            let stories = res_stories.data.issues.map(x => issue_json_to_task_or_story(root_url, x));
-            let tasks = res_tasks.data.issues.map(x => issue_json_to_task_or_story(root_url, x));
+            let stories = res_stories.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x));
+            let tasks = res_tasks.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x));
             group_tasks_by_story(stories, tasks);
             callback(stories);
         }));
 }
 
-function fetch_sprints(api_key, root_url, project_id, callback){
-    let url = build_sprints_url(api_key, root_url, project_id);
+function fetch_sprints(settings, project_id, callback){
+    let url = build_sprints_url(settings.api_key, settings.root_url, project_id);
     axios.get(url).then(response => {
         console.log("versions");
         console.log(response);
@@ -213,8 +298,8 @@ function fetch_sprints(api_key, root_url, project_id, callback){
     });
 }
 
-function fetch_project(api_key, root_url, project_id, callback){
-    let url = build_project_url(api_key, root_url, project_id);
+function fetch_project(settings, project_id, callback){
+    let url = build_project_url(settings.api_key, settings.root_url, project_id);
     axios.get(url).then(response => {
         console.log("project");
         console.log(response);
@@ -226,7 +311,7 @@ function build_project_summary(root_url, project_id){
     return {
         id: project_id,
         title: "",
-        url: build_backlog_url(root_url, project_id),
+        url: build_backlog_page_url(root_url, project_id),
         sprints: []
     };
 }
