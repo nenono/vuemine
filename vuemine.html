@@ -99,7 +99,7 @@
          });
          Vue.component('story-item', {
              props: ['story'],
-             template: '<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a> <span v-bind:class="\'story-status \' + story.status">({{ story.status }})</span> <span v-bind:class="\'story-title \' + story.status">{{ story.title }}</span><br /><task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" /></div>'
+             template: '<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a> <span v-bind:class="\'story-status \' + story.status.name">({{ story.status.label }})</span> <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span><br /><task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" /></div>'
          });
          Vue.component('task-item', {
              props: ['task'],
@@ -114,11 +114,11 @@
                  }
              },
              template: `<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
-                 <span v-bind:class="\'task-status \' + task.status">({{ task.status }})</span>
-                 <template v-if="task.is_startable"><button v-on:click="start(task.id)">start</button></template>
-                 <template v-else-if="task.is_doneable"><button v-on:click="done(task.id)">done</button></template>
+                 <span v-bind:class="\'task-status \' + task.status.name">({{ task.status.label }})</span>
+                 <template v-if="task.is_startable"><button v-on:click="start(task)">start</button></template>
+                 <template v-else-if="task.is_doneable"><button v-on:click="done(task)">done</button></template>
                  <template v-else></template>
-                 <span v-bind:class="\'task-title \' + task.status">{{ task.title }}</span>
+                 <span v-bind:class="\'task-title \' + task.status.name">{{ task.title }}</span>
              </div>`
          });
 

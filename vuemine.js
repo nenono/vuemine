@@ -135,25 +135,30 @@ function build_issue_url(root_url, issue_id){
     return `${root_url}issues/${issue_id}`;
 }
 
-function convert_status(japanese_name){
-    switch(japanese_name){
-    case '新規':
-        return "new";
-    case '進行中':
-        return "running";
-    case 'レビュー':
-        return "review";
-    case 'フィードバック':
-        return "feedback";
-    case '終了':
-        return "done";
-    case '却下':
-        return "reject";
-    }
+
+function convert_status(status){
+    let translated = ((japanese_name) => {
+        switch(japanese_name){
+        case '新規':
+            return "new";
+        case '進行中':
+            return "running";
+        case 'レビュー':
+            return "review";
+        case 'フィードバック':
+            return "feedback";
+        case '終了':
+            return "done";
+        case '却下':
+            return "reject";
+        default:
+            return "";
+        }})(status.name);
+    return { 'id': status.id, 'name': translated, 'label': status.name };
 }
 
 function issue_is_startable(status){
-    switch(status){
+    switch(status.name){
     case 'new':
         return true;
     default:
@@ -162,7 +167,7 @@ function issue_is_startable(status){
 }
 
 function issue_is_doneable(status){
-    switch(status){
+    switch(status.name){
     case 'running':
     case 'review':
     case 'feedback':
@@ -172,8 +177,38 @@ function issue_is_doneable(status){
     }
 }
 
+function update_issue(settings, issue, request_body){
+    let url = build_issue_url(settings.root_url, issue.id) + '.json';
+    axios.put(url, request_body).then(response => {
+        console.log('issue updated.');
+        console.log(response);
+    });
+}
+
+function issue_start(issue, settings){
+    console.log('issue start');
+    console.log(issue);
+    let body = {
+        'issue': {
+            'status_id': issue.status.id + 1
+        }
+    };
+    update_issue(settings, issue, body);
+}
+
+function issue_done(issue, settings){
+    console.log('issue done');
+    console.log(issue);
+    let body = {
+        'issue': {
+            'status_id': 5
+        }
+    };
+    update_issue(settings, issue, body);
+}
+
 function issue_json_to_task_or_story(root_url, issue){
-    let status = convert_status(issue.status.name);
+    let status = convert_status(issue.status);
     return {
         id: issue.id,
         number: issue.id,
