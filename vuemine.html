@@ -117,9 +117,8 @@
              },
              template: `<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
                  <span v-bind:class="\'task-status \' + task.status.name">({{ task.status.label }})</span>
-                 <template v-if="task.is_startable"><button v-on:click="start(task)">start</button></template>
-                 <template v-else-if="task.is_doneable"><button v-on:click="done(task)">done</button></template>
-                 <template v-else></template>
+                 <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
+                 <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>
                  <span v-bind:class="\'task-title \' + task.status.name">{{ task.title }}</span>
              </div>`
          });

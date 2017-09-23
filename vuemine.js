@@ -212,18 +212,19 @@ function issue_done(issue, settings){
 
 function issue_json_to_task_or_story(root_url, issue){
     let status = convert_status(issue.status);
-    return {
+    let self = {
         id: issue.id,
         number: issue.id,
         title: issue.subject,
         status: status,
         url: build_issue_page_url(root_url, issue.id),
         parent_id: issue.parent ? issue.parent.id : null,
-        is_startable: issue_is_startable(status),
-        is_doneable: issue_is_doneable(status),
+        is_startable: function(){ return issue_is_startable(self.status); },
+        is_doneable: function(){ return issue_is_doneable(self.status); },
         start: function(settings){ issue_start(this, settings); },
         done: function(settings){ issue_done(this, settings); }
     };
+    return self;
 }
 
 function group_tasks_by_story(stories, tasks){
