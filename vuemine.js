@@ -123,7 +123,7 @@ function build_tasks_url(api_key, root_url, project_id, sprint_id ){
     return `${root_url}projects/${project_id}/issues.json?key=${api_key}&limit=100&backlogs_issue_type=task&fixed_version_id=${sprint_id}&status_id=*`;
 }
 
-function build_backlog_url(root_url, project_id){
+function build_backlog_page_url(root_url, project_id){
     return `${root_url}rb/master_backlog/${project_id}`;
 }
 
@@ -131,7 +131,7 @@ function build_project_url(api_key, root_url, project_id){
     return `${root_url}projects/${project_id}.json?key=${api_key}`;
 }
 
-function build_issue_url(root_url, issue_id){
+function build_issue_page_url(root_url, issue_id){
     return `${root_url}issues/${issue_id}`;
 }
 
@@ -284,7 +284,7 @@ function build_project_summary(root_url, project_id){
     return {
         id: project_id,
         title: "",
-        url: build_backlog_url(root_url, project_id),
+        url: build_backlog_page_url(root_url, project_id),
         sprints: []
     };
 }
