@@ -69,10 +69,10 @@
              methods:{
                  load: function(){
                      let self = this;
-                     fetch_project(settings.api_key, settings.root_url, this.project.id, function(title){
+                     fetch_project(settings, this.project.id, function(title){
                          self.project.title = title;
                      });
-                     fetch_sprints(settings.api_key, settings.root_url, this.project.id, function(sprints){
+                     fetch_sprints(settings, this.project.id, function(sprints){
                          self.project.sprints = sprints;
                      });
                  }
@@ -88,7 +88,7 @@
              methods:{
                  load: function(){
                      let self = this;
-                     fetch_stories(settings.api_key, settings.root_url, self.$parent.project.id, self.sprint.id, function(stories){
+                     fetch_stories(settings, self.$parent.project.id, self.sprint.id, function(stories){
                          self.sprint.stories = stories;
                      });
                  }

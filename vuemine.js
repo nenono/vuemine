@@ -200,9 +200,9 @@ function group_tasks_by_story(stories, tasks){
     });
 }
 
-function fetch_stories(api_key, root_url, project_id, sprint_id, callback){
-    let stories_url = build_stories_url(api_key, root_url, project_id, sprint_id);
-    let tasks_url = build_tasks_url(api_key, root_url, project_id, sprint_id);
+function fetch_stories(settings, project_id, sprint_id, callback){
+    let stories_url = build_stories_url(settings.api_key, settings.root_url, project_id, sprint_id);
+    let tasks_url = build_tasks_url(settings.api_key, settings.root_url, project_id, sprint_id);
     axios.all([
         axios.get(stories_url),
         axios.get(tasks_url)])
@@ -211,15 +211,15 @@ function fetch_stories(api_key, root_url, project_id, sprint_id, callback){
             console.log(res_stories);
             console.log("tasks");
             console.log(res_tasks);
-            let stories = res_stories.data.issues.map(x => issue_json_to_task_or_story(root_url, x));
-            let tasks = res_tasks.data.issues.map(x => issue_json_to_task_or_story(root_url, x));
+            let stories = res_stories.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x));
+            let tasks = res_tasks.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x));
             group_tasks_by_story(stories, tasks);
             callback(stories);
         }));
 }
 
-function fetch_sprints(api_key, root_url, project_id, callback){
-    let url = build_sprints_url(api_key, root_url, project_id);
+function fetch_sprints(settings, project_id, callback){
+    let url = build_sprints_url(settings.api_key, settings.root_url, project_id);
     axios.get(url).then(response => {
         console.log("versions");
         console.log(response);
@@ -236,8 +236,8 @@ function fetch_sprints(api_key, root_url, project_id, callback){
     });
 }
 
-function fetch_project(api_key, root_url, project_id, callback){
-    let url = build_project_url(api_key, root_url, project_id);
+function fetch_project(settings, project_id, callback){
+    let url = build_project_url(settings.api_key, settings.root_url, project_id);
     axios.get(url).then(response => {
         console.log("project");
         console.log(response);
