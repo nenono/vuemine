@@ -17,7 +17,7 @@ A viewer of redmine multiple projects in web browser.
 1. Input redmine url. (example: `http://my-redmine-domain/`)
 2. Input project ids. (example: `497,498,499`)
   * Project ids should be separated comma(`,`).
-3. Input remind api key.
+3. Input redmine api key.
 4. Press `show` button.
 
 ### Change status
