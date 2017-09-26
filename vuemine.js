@@ -206,8 +206,19 @@ function update_issue(settings, issue, new_status, body){
     });
 }
 
-function issue_start_with_assign_to_me(issue, settings){
+function issue_start(issue, settings){
     console.log('issue start');
+    console.log(issue);
+    let body = {
+        'issue': {
+            'status_id': statuses.running.id
+        }
+    };
+    update_issue(settings, issue, statuses.running, body);
+}
+
+function issue_start_with_assign_to_me(issue, settings){
+    console.log('issue start(with assign to me)');
     console.log(issue);
     fetch_current_user(settings, (user) => {
         let body = {
@@ -218,6 +229,18 @@ function issue_start_with_assign_to_me(issue, settings){
         };
         update_issue(settings, issue, statuses.running, body);
     });
+}
+
+function task_start(task, settings){
+    let story = task.parent;
+    console.log('task start');
+    console.log(task);
+    console.log(story);
+    // start task
+    issue_start_with_assign_to_me(task, settings);
+    // start parent story if not started
+    if(story.status.name != 'new'){ return; }
+    issue_start(story, settings);
 }
 
 function issue_done(issue, settings){
@@ -240,10 +263,14 @@ function issue_json_to_task_or_story(root_url, issue){
         status: status,
         url: build_issue_page_url(root_url, issue.id),
         parent_id: issue.parent ? issue.parent.id : null,
+        parent: null,
         is_startable: function(){ return issue_is_startable(self.status); },
         is_doneable: function(){ return issue_is_doneable(self.status); },
-        start: function(settings){ issue_start_with_assign_to_me(this, settings); },
-        done: function(settings){ issue_done(this, settings); }
+        start: function(settings){
+            if(self.parent_id){ task_start(self, settings); }
+            else { issue_start(self, settings); }
+        },
+        done: function(settings){ issue_done(self, settings); }
     };
     return self;
 }
@@ -259,6 +286,7 @@ function group_tasks_by_story(stories, tasks){
         var tasks = story_tasks[story.id];
         if(!tasks){ tasks = []; }
         story["tasks"] = tasks;
+        tasks.forEach(task=>{ task.parent = story; });
     });
 }
 
