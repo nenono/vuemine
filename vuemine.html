@@ -99,7 +99,19 @@
          });
          Vue.component('story-item', {
              props: ['story'],
-             template: '<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a> <span v-bind:class="\'story-status \' + story.status.name">({{ story.status.label }})</span> <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span><br /><task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" /></div>'
+             methods: {
+                 done: function(story) {
+                     console.log('story.done');
+                     console.log(story.id);
+                     story.done(settings);
+                 }
+             },
+             template: `<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
+                 <span v-bind:class="\'story-status \' + story.status.name">({{ story.status.label }})</span>
+                     <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
+                         <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
+                             <task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" />
+             </div>`
          });
          Vue.component('task-item', {
              props: ['task'],
