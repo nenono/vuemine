@@ -16,13 +16,13 @@ A viewer of redmine multiple projects in web browser.
 ### View projects
 1. Input redmine url. (example: `http://my-redmine-domain/`)
 2. Input project ids. (example: `497,498,499`)
-  * Project ids should be separated comma(`,`).
+    * Project ids should be separated comma(`,`).
 3. Input redmine api key.
 4. Press `show` button.
 
 ### Change status
 1. Press start button when you starting a task.
-  * If a parent of the task is status 'new', it is started automatically.
+    * If a parent of the task is status `new`, it is started automatically.
 2. Press done button with the task when you finish a task.
 3. Press done button with the story when you finish a story.
 
