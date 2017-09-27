@@ -254,12 +254,16 @@ function issue_done(issue, settings){
     update_issue(settings, issue, statuses.done, body);
 }
 
+function sum(arr){
+    return arr.reduce((prev, current, i, arr) => prev + current);
+}
+
 function remaining_hours(issue){
     if(issue.is_finished()){
         return 0;
     }
     if(issue.tasks){
-        return issue.tasks.map((x)=>x.remaining_hours()).reduce((prev, current, i, arr)=>prev+current);
+        return sum(issue.tasks.map((x)=>x.remaining_hours()));
     }
     return issue.estimated_hours;
 }
