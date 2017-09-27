@@ -254,6 +254,32 @@ function issue_done(issue, settings){
     update_issue(settings, issue, statuses.done, body);
 }
 
+function sum(arr){
+    if(arr.length == 0){ return 0; }
+    let result = arr.map(x => x || 0).reduce((prev, current, i, arr) => prev + current);
+    return result;
+}
+
+function remaining_hours(issue){
+    if(issue.is_finished()){
+        return 0;
+    }
+    if(issue.tasks){
+        return sum(issue.tasks.map((x)=>x.remaining_hours()));
+    }
+    return issue.estimated_hours;
+}
+
+function is_finished(status){
+    switch(status.name){
+    case 'done':
+    case 'reject':
+        return true;
+    default:
+        return false;
+    }
+}
+
 function issue_json_to_task_or_story(root_url, issue){
     let status = convert_status(issue.status);
     let self = {
@@ -264,13 +290,16 @@ function issue_json_to_task_or_story(root_url, issue){
         url: build_issue_page_url(root_url, issue.id),
         parent_id: issue.parent ? issue.parent.id : null,
         parent: null,
-        is_startable: function(){ return issue_is_startable(self.status); },
-        is_doneable: function(){ return issue_is_doneable(self.status); },
-        start: function(settings){
+        estimated_hours: issue.estimated_hours || 0,
+        remaining_hours: ()=>remaining_hours(self),
+        is_startable: ()=>issue_is_startable(self.status),
+        is_doneable: ()=>issue_is_doneable(self.status),
+        start: (settings)=>{
             if(self.parent_id){ task_start(self, settings); }
             else { issue_start(self, settings); }
         },
-        done: function(settings){ issue_done(self, settings); }
+        done: (settings)=>issue_done(self, settings),
+        is_finished: ()=>is_finished(self.status)
     };
     return self;
 }
@@ -308,6 +337,18 @@ function fetch_stories(settings, project_id, sprint_id, callback){
         }));
 }
 
+function version_json_to_sprint(sprint){
+    let self = {
+        id: sprint.id,
+        title: sprint.name,
+        start: new Date(sprint.created_on),
+        end: new Date(sprint.due_date),
+        stories: [],
+        remaining_hours: ()=> sum(self.stories.map((x) => x.remaining_hours()))
+    };
+    return self;
+}
+
 function fetch_sprints(settings, project_id, callback){
     let url = build_sprints_url(settings.api_key, settings.root_url, project_id);
     axios.get(url).then(response => {
@@ -315,13 +356,7 @@ function fetch_sprints(settings, project_id, callback){
         console.log(response);
         let sprints = response.data.versions
             .filter(sprint => sprint.status == "open")
-            .map(sprint => ({
-                id: sprint.id,
-                title: sprint.name,
-                start: new Date(sprint.created_on),
-                end: new Date(sprint.due_date),
-                stories:[]
-            }));
+            .map(version_json_to_sprint);
         callback(sprints);
     });
 }

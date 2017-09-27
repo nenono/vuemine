@@ -24,7 +24,7 @@
          /* layouts in items */
          .project-title, .sprint-title { font-size: 1.2em; font-weight: bold; }
          .story-number, .task-number { font-size: 0.8em; }
-         .story-status, .task-status { font-size: 0.8em; }
+         .sprint-status, .story-status, .task-status { font-size: 0.8em; }
          .story-title, .task-title { margin-left: 10px; display: inline-block }
          .task-title { font-size:0.9em; }
          .sprint-term { font-size: 0.5em }
@@ -84,7 +84,13 @@
 
          Vue.component('sprint-item', {
              props: ['sprint'],
-             template: '<div class="sprint"><span class="sprint-term">{{ sprint.start.toLocaleDateString() }} -&gt; {{ sprint.end.toLocaleDateString() }}</span> <span class="sprint-title">{{ sprint.title }}</span><br /><story-item v-for="x in sprint.stories" v-bind:story="x" :key="x.id" /></div>',
+             template: `<div class="sprint">
+                 <span class="sprint-term">{{ sprint.start.toLocaleDateString() }} -&gt; {{ sprint.end.toLocaleDateString() }}</span>
+                 <span class="sprint-status">[{{ sprint.remaining_hours().toFixed(1) }}]</span>
+                 <span class="sprint-title">{{ sprint.title }}</span>
+                 <br />
+                 <story-item v-for="x in sprint.stories" v-bind:story="x" :key="x.id" />
+             </div>`,
              methods:{
                  load: function(){
                      let self = this;
@@ -107,7 +113,7 @@
                  }
              },
              template: `<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
-                 <span v-bind:class="\'story-status \' + story.status.name">({{ story.status.label }})</span>
+                 <span v-bind:class="\'story-status \' + story.status.name">[{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}]</span>
                  <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
                  <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
                  <task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" />
@@ -128,7 +134,7 @@
                  }
              },
              template: `<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
-                 <span v-bind:class="\'task-status \' + task.status.name">({{ task.status.label }})</span>
+                 <span v-bind:class="\'task-status \' + task.status.name">[{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}]</span>
                  <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
                  <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>
                  <span v-bind:class="\'task-title \' + task.status.name">{{ task.title }}</span>
