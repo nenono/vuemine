@@ -335,6 +335,16 @@ function fetch_stories(settings, project_id, sprint_id, callback){
         }));
 }
 
+function version_json_to_sprint(sprint){
+    return {
+        id: sprint.id,
+        title: sprint.name,
+        start: new Date(sprint.created_on),
+        end: new Date(sprint.due_date),
+        stories: []
+    };
+}
+
 function fetch_sprints(settings, project_id, callback){
     let url = build_sprints_url(settings.api_key, settings.root_url, project_id);
     axios.get(url).then(response => {
@@ -342,13 +352,7 @@ function fetch_sprints(settings, project_id, callback){
         console.log(response);
         let sprints = response.data.versions
             .filter(sprint => sprint.status == "open")
-            .map(sprint => ({
-                id: sprint.id,
-                title: sprint.name,
-                start: new Date(sprint.created_on),
-                end: new Date(sprint.due_date),
-                stories:[]
-            }));
+            .map(version_json_to_sprint);
         callback(sprints);
     });
 }
