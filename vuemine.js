@@ -264,13 +264,13 @@ function issue_json_to_task_or_story(root_url, issue){
         url: build_issue_page_url(root_url, issue.id),
         parent_id: issue.parent ? issue.parent.id : null,
         parent: null,
-        is_startable: function(){ return issue_is_startable(self.status); },
-        is_doneable: function(){ return issue_is_doneable(self.status); },
-        start: function(settings){
+        is_startable: ()=>issue_is_startable(self.status),
+        is_doneable: ()=>issue_is_doneable(self.status),
+        start: (settings)=>{
             if(self.parent_id){ task_start(self, settings); }
             else { issue_start(self, settings); }
         },
-        done: function(settings){ issue_done(self, settings); }
+        done: (settings)=>issue_done(self, settings)
     };
     return self;
 }
