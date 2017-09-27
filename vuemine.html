@@ -107,7 +107,7 @@
                  }
              },
              template: `<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
-                 <span v-bind:class="\'story-status \' + story.status.name">({{ story.status.label }})</span>
+                 <span v-bind:class="\'story-status \' + story.status.name">[{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}]</span>
                  <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
                  <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
                  <task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" />
@@ -128,7 +128,7 @@
                  }
              },
              template: `<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
-                 <span v-bind:class="\'task-status \' + task.status.name">({{ task.status.label }})</span>
+                 <span v-bind:class="\'task-status \' + task.status.name">[{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}]</span>
                  <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
                  <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>
                  <span v-bind:class="\'task-title \' + task.status.name">{{ task.title }}</span>

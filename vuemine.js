@@ -254,6 +254,26 @@ function issue_done(issue, settings){
     update_issue(settings, issue, statuses.done, body);
 }
 
+function remaining_hours(issue){
+    if(issue.is_finished()){
+        return 0;
+    }
+    if(issue.tasks){
+        return issue.tasks.map((x)=>x.remaining_hours()).reduce((prev, current, i, arr)=>prev+current);
+    }
+    return issue.estimated_hours;
+}
+
+function is_finished(status){
+    switch(status.name){
+    case 'done':
+    case 'reject':
+        return true;
+    default:
+        return false;
+    }
+}
+
 function issue_json_to_task_or_story(root_url, issue){
     let status = convert_status(issue.status);
     let self = {
@@ -264,13 +284,16 @@ function issue_json_to_task_or_story(root_url, issue){
         url: build_issue_page_url(root_url, issue.id),
         parent_id: issue.parent ? issue.parent.id : null,
         parent: null,
+        estimated_hours: issue.estimated_hours || 0,
+        remaining_hours: ()=>remaining_hours(self),
         is_startable: ()=>issue_is_startable(self.status),
         is_doneable: ()=>issue_is_doneable(self.status),
         start: (settings)=>{
             if(self.parent_id){ task_start(self, settings); }
             else { issue_start(self, settings); }
         },
-        done: (settings)=>issue_done(self, settings)
+        done: (settings)=>issue_done(self, settings),
+        is_finished: ()=>is_finished(self.status)
     };
     return self;
 }
