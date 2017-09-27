@@ -255,7 +255,9 @@ function issue_done(issue, settings){
 }
 
 function sum(arr){
-    return arr.reduce((prev, current, i, arr) => prev + current);
+    if(arr.length == 0){ return 0; }
+    let result = arr.map(x => x || 0).reduce((prev, current, i, arr) => prev + current);
+    return result;
 }
 
 function remaining_hours(issue){
@@ -336,13 +338,15 @@ function fetch_stories(settings, project_id, sprint_id, callback){
 }
 
 function version_json_to_sprint(sprint){
-    return {
+    let self = {
         id: sprint.id,
         title: sprint.name,
         start: new Date(sprint.created_on),
         end: new Date(sprint.due_date),
-        stories: []
+        stories: [],
+        remaining_hours: ()=> sum(self.stories.map((x) => x.remaining_hours()))
     };
+    return self;
 }
 
 function fetch_sprints(settings, project_id, callback){
