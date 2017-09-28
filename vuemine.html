@@ -88,6 +88,7 @@
                  <span class="sprint-term">{{ sprint.start.toLocaleDateString() }} -&gt; {{ sprint.end.toLocaleDateString() }}</span>
                  <span class="sprint-status">[{{ sprint.remaining_hours().toFixed(1) }}]</span>
                  <span class="sprint-title">{{ sprint.title }}</span>
+                 <span><button v-on:click="reload()">reload</button></span>
                  <br />
                  <story-item v-for="x in sprint.stories" v-bind:story="x" :key="x.id" />
              </div>`,
@@ -97,6 +98,10 @@
                      fetch_stories(settings, self.$parent.project.id, self.sprint.id, function(stories){
                          self.sprint.stories = stories;
                      });
+                 },
+                 reload: function(){
+                     this.sprint.stories = [];
+                     this.load();
                  }
              },
              mounted: function(){
