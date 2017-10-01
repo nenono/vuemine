@@ -97,6 +97,26 @@ let statuses = {
     'done': {'id': 5, 'name': 'done', 'label': '終了'}
 };
 
+function copy(str){
+    // add temporary DOM node
+    let node = document.createElement('div');
+    node.setAttribute('visible', false);
+    node.textContent = str;
+    document.body.appendChild(node);
+
+    // copy
+    let range = document.createRange();
+    range.selectNode(node);
+    let selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.execCommand('copy');
+
+    // remove selection and node
+    selection.removeAllRanges();
+    document.body.removeChild(node);
+}
+
 function parse_query(query){
     // TODO: query stringのparseをもうすこしまともにする
     try{
