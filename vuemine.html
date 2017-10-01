@@ -9,7 +9,7 @@
          body { background-color: #222222; color: #EEEEEE }
          a { color: #9999DD  }
          a:hover{ color: #AAAAFF }
-         button{ background-color: #666666; color: #EEEEEE ; border-style: none;}
+         button{ background-color: #666666; color: #EEEEEE ; border-style: none; padding: 0px 1px 0px 1px }
 
          /* layouts */
          dl { display: inline; margin: 0px; }
@@ -28,6 +28,7 @@
          .story-title, .task-title { margin-left: 10px; display: inline-block }
          .task-title { font-size:0.9em; }
          .sprint-term { font-size: 0.5em }
+         .task-general, .story-general { border-bottom-style:solid; border-color: #444444; border-width: 1px; }
 
          /* status colors */
          .running { color: #FFAAAA }
@@ -115,11 +116,19 @@
                      console.log('story.done');
                      console.log(story.id);
                      story.done(settings);
+                 },
+                 copy: function(id){
+                     console.log(`copy ${id}`);
+                     copy(id);
                  }
              },
-             template: `<div class="story"><a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
-                 <span v-bind:class="\'story-status \' + story.status.name">[{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}]</span>
-                 <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
+             template: `<div class="story">
+                 <span class="story-general">
+                     <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
+                     <button v-on:click="copy(story.id)">@</button>
+                     <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
+                     <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
+                 </span>
                  <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
                  <task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" />
              </div>`
@@ -136,12 +145,20 @@
                      console.log('task.done');
                      console.log(task.id);
                      task.done(settings);
+                 },
+                 copy: function(id){
+                     console.log(`copy ${id}`);
+                     copy(id);
                  }
              },
-             template: `<div class="task"><a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
-                 <span v-bind:class="\'task-status \' + task.status.name">[{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}]</span>
-                 <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
-                 <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>
+             template: `<div class="task">
+                 <span class="task-general">
+                     <a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
+                     <button v-on:click="copy(task.id)">@</button>
+                     <span v-bind:class="\'task-status \' + task.status.name">{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}</span>
+                     <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
+                     <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>
+                 </span>
                  <span v-bind:class="\'task-title \' + task.status.name">{{ task.title }}</span>
              </div>`
          });
