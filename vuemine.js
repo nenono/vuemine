@@ -100,7 +100,6 @@ let statuses = {
 function copy(str){
     // add temporary DOM node
     let node = document.createElement('div');
-    node.style.display = 'none';
     node.textContent = str;
     document.body.appendChild(node);
 
