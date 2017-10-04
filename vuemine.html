@@ -125,7 +125,7 @@
              template: `<div class="story">
                  <span class="story-general">
                      <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
-                     <button v-on:click="copy(story.id)">@</button>
+                     <button title="copy id"  v-on:click="copy(story.id)">@</button>
                      <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
                      <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
                  </span>
@@ -154,7 +154,7 @@
              template: `<div class="task">
                  <span class="task-general">
                      <a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
-                     <button v-on:click="copy(task.id)">@</button>
+                     <button title="copy id" v-on:click="copy(task.id)">@</button>
                      <span v-bind:class="\'task-status \' + task.status.name">{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}</span>
                      <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
                      <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>
