@@ -93,8 +93,13 @@ let stub = {
 
 
 let statuses = {
+    'new': {'id': 1, 'name': 'new', 'label': '新規'},
     'running': {'id': 2, 'name': 'running', 'label': '進行中'},
     'done': {'id': 5, 'name': 'done', 'label': '終了'}
+};
+
+let trackers = {
+    task: {id: 3, name: 'task', label: 'タスク'}
 };
 
 function copy(str){
@@ -140,6 +145,10 @@ function build_sprints_url(api_key, root_url, project_id){
 
 function build_stories_url(api_key, root_url, project_id, sprint_id){
     return `${root_url}projects/${project_id}/issues.json?key=${api_key}&limit=100&backlogs_issue_type=story&fixed_version_id=${sprint_id}&status_id=*`;
+}
+
+function build_issues_in_project_url(api_key, root_url, project_id){
+    return `${root_url}projects/${project_id}/issues.json?key=${api_key}`;
 }
 
 function build_tasks_url(api_key, root_url, project_id, sprint_id ){
@@ -216,7 +225,7 @@ function issue_is_doneable(status){
     }
 }
 
-function update_issue(settings, issue, new_status, body){
+function issue_update_status(settings, issue, new_status, body){
     let url = build_issue_url(settings.api_key, settings.root_url, issue.id);
     axios.put(url, body).then(response => {
         console.log('issue updated.');
@@ -233,7 +242,7 @@ function issue_start(issue, settings){
             'status_id': statuses.running.id
         }
     };
-    update_issue(settings, issue, statuses.running, body);
+    issue_update_status(settings, issue, statuses.running, body);
 }
 
 function issue_start_with_assign_to_me(issue, settings){
@@ -246,7 +255,7 @@ function issue_start_with_assign_to_me(issue, settings){
                 'assigned_to_id': user.id
             }
         };
-        update_issue(settings, issue, statuses.running, body);
+        issue_update_status(settings, issue, statuses.running, body);
     });
 }
 
@@ -270,13 +279,67 @@ function issue_done(issue, settings){
             'status_id': statuses.done.id
         }
     };
-    update_issue(settings, issue, statuses.done, body);
+    issue_update_status(settings, issue, statuses.done, body);
+}
+
+function issue_to_json(issue){
+    let json = {
+        subject: issue.title,
+        status_id: issue.status.id,
+        parent_issue_id: issue.parent ? issue.parent.id : null,
+        estimated_hours: issue.estimated_hours || 0,
+        tracker_id: trackers.task.id
+    };
+    if(issue.id){ json["id"] = issue.id; }
+    return { issue: json };
+}
+
+function json_to_issue(json, root_url, project_id){
+    let status = convert_status(json.status);
+    return {
+        id: json.id,
+        number: json.id,
+        title: json.subject,
+        status: status,
+        url: build_issue_page_url(root_url, json.id),
+        parent_id: json.parent ? json.parent.id : null,
+        parent: null,
+        estimated_hours: json.estimated_hours || 0,
+        is_editing: false,
+        project_id: project_id
+    };
+}
+
+function issue_create(issue, settings){
+    let url = build_issues_in_project_url(settings.api_key, settings.root_url, issue.project_id);
+    let body = issue_to_json(issue);
+    axios.post(url, body).then(response => {
+        console.log('issue created.');
+        console.log(response);
+        Object.assign(issue, json_to_issue(response.data.issue, settings.root_url, issue.project_id));
+        issue.is_editing = false;
+    });
+}
+
+function issue_update(issue, settings){
+    let url = build_issue_url(settings.api_key, settings.root_url, issue.id);
+    let body = issue_to_json(issue);
+    axios.put(url, body).then(response => {
+        console.log('issue updated.');
+        console.log(response);
+        issue.is_editing = false;
+    });
 }
 
 function sum(arr){
     if(arr.length == 0){ return 0; }
     let result = arr.map(x => x || 0).reduce((prev, current, i, arr) => prev + current);
     return result;
+}
+
+function remove(arr, elm){
+    let pos = arr.indexOf(elm);
+    arr.splice(pos, 1);
 }
 
 function remaining_hours(issue){
@@ -286,7 +349,7 @@ function remaining_hours(issue){
     if(issue.tasks){
         return sum(issue.tasks.map((x)=>x.remaining_hours()));
     }
-    return issue.estimated_hours;
+    return parseFloat(issue.estimated_hours);
 }
 
 function is_finished(status){
@@ -299,28 +362,51 @@ function is_finished(status){
     }
 }
 
-function issue_json_to_task_or_story(root_url, issue){
-    let status = convert_status(issue.status);
+function new_issue(){
     let self = {
-        id: issue.id,
-        number: issue.id,
-        title: issue.subject,
-        status: status,
-        url: build_issue_page_url(root_url, issue.id),
-        parent_id: issue.parent ? issue.parent.id : null,
+        id: null,
+        number: null,
+        title:null,
+        status: statuses.new,
+        url: null,
+        parent_id: null,
         parent: null,
-        estimated_hours: issue.estimated_hours || 0,
+        estimated_hours: 0,
+        is_editing: false,
+        project_id: null,
         remaining_hours: ()=>remaining_hours(self),
         is_startable: ()=>issue_is_startable(self.status),
         is_doneable: ()=>issue_is_doneable(self.status),
+        is_task: ()=> self.parent_id ? true: false,
         start: (settings)=>{
-            if(self.parent_id){ task_start(self, settings); }
+            if(self.is_task()){ task_start(self, settings); }
             else { issue_start(self, settings); }
         },
         done: (settings)=>issue_done(self, settings),
-        is_finished: ()=>is_finished(self.status)
+        is_finished: ()=>is_finished(self.status),
+        save: (settings)=>{
+            if(!self.id){ issue_create(self, settings); }
+            else { issue_update(self, settings); }
+        }
     };
     return self;
+}
+
+function add_task(story, project_id){
+    let task = new_issue();
+    Object.assign(task, {
+        is_editing: true,
+        project_id: project_id,
+        parent_id: story.id,
+        parent: story
+    });
+    story.tasks.push(task);
+}
+
+function issue_json_to_task_or_story(root_url, issue, project_id){
+    let task = new_issue();
+    Object.assign(task, json_to_issue(issue, root_url, project_id));
+    return task;
 }
 
 function group_tasks_by_story(stories, tasks){
@@ -349,8 +435,8 @@ function fetch_stories(settings, project_id, sprint_id, callback){
             console.log(res_stories);
             console.log("tasks");
             console.log(res_tasks);
-            let stories = res_stories.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x));
-            let tasks = res_tasks.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x));
+            let stories = res_stories.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x, project_id));
+            let tasks = res_tasks.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x, project_id));
             group_tasks_by_story(stories, tasks);
             callback(stories);
         }));
