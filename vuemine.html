@@ -76,7 +76,7 @@
              methods:{
                  load: function(){
                      let self = this;
-                     fetch_project(settings, this.project.id, function(title){
+                     project_fetch(settings, this.project.id, function(title){
                          self.project.title = title;
                      });
                      sprints_fetch(settings, this.project.id, function(sprints){
