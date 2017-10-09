@@ -102,7 +102,7 @@ let trackers = {
     task: {id: 3, name: 'task', label: 'タスク'}
 };
 
-function copy(str){
+function clipboard_copy(str){
     // add temporary DOM node
     let node = document.createElement('div');
     node.textContent = str;

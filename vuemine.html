@@ -191,7 +191,7 @@
                  <span v-show="!task.is_editing">
                      <span class="task-general">
                          <a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
-                         <button title="copy id" v-on:click="copy(task.id)">@</button>
+                         <button title="copy id" v-on:click="clipboard_copy(task.id)">@</button>
                          <button title="edit" v-on:click="edit(task)">*</button>
                          <span v-bind:class="\'task-status \' + task.status.name">{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}</span>
                          <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
