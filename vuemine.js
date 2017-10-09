@@ -225,7 +225,7 @@ function issue_is_doneable(status){
     }
 }
 
-function issue_update_status(settings, issue, new_status, body){
+function issue_update_status(issue, new_status, body, settings){
     let url = build_issue_url(settings.api_key, settings.root_url, issue.id);
     axios.put(url, body).then(response => {
         console.log('issue updated.');
@@ -242,7 +242,7 @@ function issue_start(issue, settings){
             'status_id': statuses.running.id
         }
     };
-    issue_update_status(settings, issue, statuses.running, body);
+    issue_update_status(issue, statuses.running, body, settings);
 }
 
 function issue_start_with_assign_to_me(issue, settings){
@@ -255,7 +255,7 @@ function issue_start_with_assign_to_me(issue, settings){
                 'assigned_to_id': user.id
             }
         };
-        issue_update_status(settings, issue, statuses.running, body);
+        issue_update_status(issue, statuses.running, body, settings);
     });
 }
 
@@ -279,7 +279,7 @@ function issue_done(issue, settings){
             'status_id': statuses.done.id
         }
     };
-    issue_update_status(settings, issue, statuses.done, body);
+    issue_update_status(issue, statuses.done, body, settings);
 }
 
 function issue_to_json(issue){
