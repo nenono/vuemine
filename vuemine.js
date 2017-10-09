@@ -323,6 +323,31 @@ function issue_json_to_task_or_story(root_url, issue){
     return self;
 }
 
+function add_task(story){
+    let task = new_task();
+    Object.assign(task, {
+        is_editing: true
+    });
+    story.tasks.push(task);
+}
+
+function issue_json_to_task_or_story(root_url, issue){
+    let status = convert_status(issue.status);
+    let task = new_task();
+    Object.assign(task, {
+        id: issue.id,
+        number: issue.id,
+        title: issue.subject,
+        status: status,
+        url: build_issue_page_url(root_url, issue.id),
+        parent_id: issue.parent ? issue.parent.id : null,
+        parent: null,
+        estimated_hours: issue.estimated_hours || 0,
+        is_editing: false
+    });
+    return task;
+}
+
 function group_tasks_by_story(stories, tasks){
     let story_tasks = {};
     tasks.forEach(task=>{

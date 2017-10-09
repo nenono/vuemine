@@ -120,12 +120,17 @@
                  copy: function(id){
                      console.log(`copy ${id}`);
                      copy(id);
+                 },
+                 add_task: function(){
+                     console.log('add_task');
+                     add_task(this.story);
                  }
              },
              template: `<div class="story">
                  <span class="story-general">
                      <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
                      <button title="copy id"  v-on:click="copy(story.id)">@</button>
+                     <button title="add a task" v-on:click="add_task()">+</button>
                      <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
                      <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
                  </span>
