@@ -30,7 +30,7 @@
          .sprint-term { font-size: 0.5em }
          .task-general, .story-general { border-bottom-style:solid; border-color: #444444; border-width: 1px; }
          .input-hours { width: 2em; }
-         .input-title { width: 70% }
+         .input-title { width: 60% }
 
          /* status colors */
          .running { color: #FFAAAA }
@@ -165,6 +165,15 @@
                      console.log('save');
                      console.log(task);
                      task.save(settings);
+                 },
+                 edit: function(task){
+                     console.log('edit');
+                     task.is_editing = true;
+                 },
+                 cancel: function(task){
+                     console.log('cancel');
+                     if(!task.id){ remove(this.$parent.story.tasks, task); }
+                     else{ task.is_editing = false; }
                  }
              },
              template: `<div class="task">
@@ -177,11 +186,13 @@
                      </span>
                      <input class="input-title" v-model='task.title' placeholder='title' />
                      <button v-on:click="save(task)">save</button>
+                     <button v-on:click="cancel(task)">cancel</button>
                  </span>
                  <span v-show="!task.is_editing">
                      <span class="task-general">
                          <a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
                          <button title="copy id" v-on:click="copy(task.id)">@</button>
+                         <button title="edit" v-on:click="edit(task)">*</button>
                          <span v-bind:class="\'task-status \' + task.status.name">{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}</span>
                          <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
                          <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>

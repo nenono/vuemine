@@ -329,6 +329,11 @@ function sum(arr){
     return result;
 }
 
+function remove(arr, elm){
+    let pos = arr.indexOf(elm);
+    arr.splice(pos, 1);
+}
+
 function remaining_hours(issue){
     if(issue.is_finished()){
         return 0;
