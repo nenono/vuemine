@@ -331,7 +331,7 @@ function issue_update(issue, settings){
     });
 }
 
-function sum(arr){
+function array_sum(arr){
     if(arr.length == 0){ return 0; }
     let result = arr.map(x => x || 0).reduce((prev, current, i, arr) => prev + current);
     return result;
@@ -347,7 +347,7 @@ function remaining_hours(issue){
         return 0;
     }
     if(issue.tasks){
-        return sum(issue.tasks.map((x)=>x.remaining_hours()));
+        return array_sum(issue.tasks.map((x)=>x.remaining_hours()));
     }
     return parseFloat(issue.estimated_hours);
 }
@@ -449,7 +449,7 @@ function version_json_to_sprint(sprint){
         start: new Date(sprint.created_on),
         end: new Date(sprint.due_date),
         stories: [],
-        remaining_hours: ()=> sum(self.stories.map((x) => x.remaining_hours()))
+        remaining_hours: ()=> array_sum(self.stories.map((x) => x.remaining_hours()))
     };
     return self;
 }
