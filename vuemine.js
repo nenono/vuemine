@@ -484,6 +484,6 @@ function project_new(root_url, project_id){
     };
 }
 
-function build_projects(root_url, project_ids){
+function projects_new(root_url, project_ids){
     return project_ids.split(',').map(id => project_new(root_url, id));
 }
