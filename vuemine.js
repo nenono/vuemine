@@ -93,6 +93,7 @@ let stub = {
 
 
 let statuses = {
+    'new': {'id': 1, 'name': 'new', 'label': '新規'},
     'running': {'id': 2, 'name': 'running', 'label': '進行中'},
     'done': {'id': 5, 'name': 'done', 'label': '終了'}
 };
@@ -299,17 +300,17 @@ function is_finished(status){
     }
 }
 
-function issue_json_to_task_or_story(root_url, issue){
-    let status = convert_status(issue.status);
+function new_task(){
     let self = {
-        id: issue.id,
-        number: issue.id,
-        title: issue.subject,
-        status: status,
-        url: build_issue_page_url(root_url, issue.id),
-        parent_id: issue.parent ? issue.parent.id : null,
+        id: null,
+        number: null,
+        title:null,
+        status: statuses.new,
+        url: null,
+        parent_id: null,
         parent: null,
-        estimated_hours: issue.estimated_hours || 0,
+        estimated_hours: 0,
+        is_editing: false,
         remaining_hours: ()=>remaining_hours(self),
         is_startable: ()=>issue_is_startable(self.status),
         is_doneable: ()=>issue_is_doneable(self.status),
