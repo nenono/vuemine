@@ -179,7 +179,7 @@
              template: `<div class="task">
                  <span v-show="task.is_editing">
                      <span class="task-general">
-                         <select>
+                         <select v-model="task.status">
                              <option v-for='status in statuses' v-bind:value='status' :key="status.id">{{ status.label }}</option>
                          </select>
                          | <input class="input-hours" v-model='task.estimated_hours' placeholder='hours' />
