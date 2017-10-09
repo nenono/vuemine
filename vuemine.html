@@ -129,7 +129,7 @@
                  },
                  add_task: function(){
                      console.log('add_task');
-                     add_task(this.story);
+                     add_task(this.story, this.$parent.$parent.project.id);
                  }
              },
              template: `<div class="story">
