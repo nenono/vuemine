@@ -321,6 +321,14 @@ function issue_create(issue, settings){
     });
 }
 
+function issue_update(issue, settings){
+    let url = build_issue_url(settings.api_key, settings.root_url, issue.id);
+    let body = issue_to_json(issue);
+    axios.put(url, body).then(response => {
+        console.log('issue updated.');
+        console.log(response);
+        issue.is_editing = false;
+    });
 }
 
 function sum(arr){
