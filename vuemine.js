@@ -409,7 +409,7 @@ function story_add_task(story, project_id){
     story.tasks.push(task);
 }
 
-function group_tasks_by_story(stories, tasks){
+function stories_grouping_tasks(stories, tasks){
     let story_tasks = {};
     tasks.forEach(task=>{
         var arr = story_tasks[task.parent_id];
@@ -437,7 +437,7 @@ function fetch_stories(settings, project_id, sprint_id, callback){
             console.log(res_tasks);
             let stories = res_stories.data.issues.map(x => issue_new_with_json(settings.root_url, x, project_id));
             let tasks = res_tasks.data.issues.map(x => issue_new_with_json(settings.root_url, x, project_id));
-            group_tasks_by_story(stories, tasks);
+            stories_grouping_tasks(stories, tasks);
             callback(stories);
         }));
 }
