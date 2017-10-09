@@ -76,10 +76,10 @@
              methods:{
                  load: function(){
                      let self = this;
-                     fetch_project(settings, this.project.id, function(title){
+                     project_fetch(settings, this.project.id, function(title){
                          self.project.title = title;
                      });
-                     fetch_sprints(settings, this.project.id, function(sprints){
+                     sprints_fetch(settings, this.project.id, function(sprints){
                          self.project.sprints = sprints;
                      });
                  }
@@ -102,7 +102,7 @@
              methods:{
                  load: function(){
                      let self = this;
-                     fetch_stories(settings, self.$parent.project.id, self.sprint.id, function(stories){
+                     stories_fetch(settings, self.$parent.project.id, self.sprint.id, function(stories){
                          self.sprint.stories = stories;
                      });
                  },
@@ -129,7 +129,7 @@
                  },
                  add_task: function(){
                      console.log('add_task');
-                     add_task(this.story, this.$parent.$parent.project.id);
+                     story_add_task(this.story, this.$parent.$parent.project.id);
                  }
              },
              template: `<div class="story">
@@ -172,7 +172,7 @@
                  },
                  cancel: function(task){
                      console.log('cancel');
-                     if(!task.id){ remove(this.$parent.story.tasks, task); }
+                     if(!task.id){ array_remove(this.$parent.story.tasks, task); }
                      else{ task.is_editing = false; }
                  }
              },
@@ -191,7 +191,7 @@
                  <span v-show="!task.is_editing">
                      <span class="task-general">
                          <a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
-                         <button title="copy id" v-on:click="copy(task.id)">@</button>
+                         <button title="copy id" v-on:click="clipboard_copy(task.id)">@</button>
                          <button title="edit" v-on:click="edit(task)">*</button>
                          <span v-bind:class="\'task-status \' + task.status.name">{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}</span>
                          <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
@@ -208,7 +208,7 @@
          });
 
          if(settings.root_url && settings.project_ids && settings.api_key){
-             projects.projects = build_projects(settings.root_url, settings.project_ids);
+             projects.projects = projects_new(settings.root_url, settings.project_ids);
          }
         </script>
     </body>
