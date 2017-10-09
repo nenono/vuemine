@@ -274,6 +274,14 @@ function issue_done(issue, settings){
     issue_update_status(settings, issue, statuses.done, body);
 }
 
+function issue_create(issue, settings){
+
+}
+
+function issue_update(issue, settings){
+
+}
+
 function sum(arr){
     if(arr.length == 0){ return 0; }
     let result = arr.map(x => x || 0).reduce((prev, current, i, arr) => prev + current);
@@ -319,7 +327,11 @@ function new_task(){
             else { issue_start(self, settings); }
         },
         done: (settings)=>issue_done(self, settings),
-        is_finished: ()=>is_finished(self.status)
+        is_finished: ()=>is_finished(self.status),
+        save: (settings)=>{
+            if(self.id){ issue_create(self, settings); }
+            else { issue_update(self, settings); }
+        }
     };
     return self;
 }

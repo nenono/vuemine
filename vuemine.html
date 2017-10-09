@@ -29,6 +29,8 @@
          .task-title { font-size:0.9em; }
          .sprint-term { font-size: 0.5em }
          .task-general, .story-general { border-bottom-style:solid; border-color: #444444; border-width: 1px; }
+         .input-hours { width: 2em; }
+         .input-title { width: 70% }
 
          /* status colors */
          .running { color: #FFAAAA }
@@ -50,9 +52,8 @@
             <button v-on:click="show">show</button>
         </div>
         <div id="projects">
-            <project-item v-for="x in projects" v-bind:project="x" :key="x.id" />
+            <project-item v-for="x in projects" v-bind:project="x" v-bind:statuses="statuses" :key="x.id" />
         </div>
-
         <script type="text/javascript">
          let settings = new Vue({
              el: '#settings',
@@ -65,8 +66,13 @@
          });
 
          Vue.component('project-item', {
-             props: ['project'],
-             template: '<div class="project"><a v-bind:href="project.url"><span class="project-title">{{ project.title }}</span></a><br /><sprint-item v-for="x in project.sprints" v-bind:sprint="x" :key="x.id" /></div>',
+             props: ['project', 'statuses'],
+             template: `<div class="project">
+                 <a v-bind:href="project.url">
+                     <span class="project-title">{{ project.title }}</span>
+                 </a><br />
+                 <sprint-item v-for="x in project.sprints" v-bind:sprint="x" v-bind:statuses="statuses" :key="x.id" />
+             </div>`,
              methods:{
                  load: function(){
                      let self = this;
@@ -84,14 +90,14 @@
          });
 
          Vue.component('sprint-item', {
-             props: ['sprint'],
+             props: ['sprint', 'statuses'],
              template: `<div class="sprint">
                  <span class="sprint-term">{{ sprint.start.toLocaleDateString() }} -&gt; {{ sprint.end.toLocaleDateString() }}</span>
                  <span class="sprint-status">[{{ sprint.remaining_hours().toFixed(1) }}]</span>
                  <span class="sprint-title">{{ sprint.title }}</span>
                  <span><button v-on:click="reload()">reload</button></span>
                  <br />
-                 <story-item v-for="x in sprint.stories" v-bind:story="x" :key="x.id" />
+                 <story-item v-for="x in sprint.stories" v-bind:story="x" v-bind:statuses="statuses" :key="x.id" />
              </div>`,
              methods:{
                  load: function(){
@@ -110,7 +116,7 @@
              }
          });
          Vue.component('story-item', {
-             props: ['story'],
+             props: ['story', 'statuses'],
              methods: {
                  done: function(story) {
                      console.log('story.done');
@@ -128,18 +134,18 @@
              },
              template: `<div class="story">
                  <span class="story-general">
-                     <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
+                 <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
                      <button title="copy id"  v-on:click="copy(story.id)">@</button>
                      <button title="add a task" v-on:click="add_task()">+</button>
                      <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
                      <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
                  </span>
-                 <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
-                 <task-item v-for="x in story.tasks" v-bind:task="x" :key="x.id" />
+                     <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
+                     <task-item v-for="x in story.tasks" v-bind:task="x" v-bind:statuses="statuses" :key="x.id" />
              </div>`
          });
          Vue.component('task-item', {
-             props: ['task'],
+             props: ['task', 'statuses'],
              methods: {
                  start: function(task) {
                      console.log('task.start');
@@ -154,23 +160,40 @@
                  copy: function(id){
                      console.log(`copy ${id}`);
                      copy(id);
+                 },
+                 save: function(task){
+                     console.log('save');
+                     console.log(task);
+                     task.save(settings);
                  }
              },
              template: `<div class="task">
-                 <span class="task-general">
-                     <a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
-                     <button title="copy id" v-on:click="copy(task.id)">@</button>
-                     <span v-bind:class="\'task-status \' + task.status.name">{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}</span>
-                     <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
-                     <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>
+                 <span v-show="task.is_editing">
+                     <span class="task-general">
+                         <select>
+                             <option v-for='status in statuses' v-bind:value='status' :key="status.id">{{ status.label }}</option>
+                         </select>
+                         | <input class="input-hours" v-model='task.estimated_hours' placeholder='hours' />
+                     </span>
+                     <input class="input-title" v-model='task.title' placeholder='title' />
+                     <button v-on:click="save(task)">save</button>
                  </span>
+                 <span v-show="!task.is_editing">
+                     <span class="task-general">
+                         <a class="task-number" v-bind:href="task.url">#{{ task.number }}</a>
+                         <button title="copy id" v-on:click="copy(task.id)">@</button>
+                         <span v-bind:class="\'task-status \' + task.status.name">{{ task.status.label }} | {{ task.remaining_hours().toFixed(1) }}</span>
+                         <span v-show="task.is_startable()"><button v-on:click="start(task)">start</button></span>
+                         <span v-show="task.is_doneable()"><button v-on:click="done(task)">done</button></span>
+                     </span>
                  <span v-bind:class="\'task-title \' + task.status.name">{{ task.title }}</span>
+                 </span>
              </div>`
          });
 
          let projects = new Vue({
              el: '#projects',
-             data: { projects: [] }
+             data: { 'projects': [], 'statuses': statuses }
          });
 
          if(settings.root_url && settings.project_ids && settings.api_key){
