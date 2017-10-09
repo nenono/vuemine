@@ -79,7 +79,7 @@
                      fetch_project(settings, this.project.id, function(title){
                          self.project.title = title;
                      });
-                     fetch_sprints(settings, this.project.id, function(sprints){
+                     sprints_fetch(settings, this.project.id, function(sprints){
                          self.project.sprints = sprints;
                      });
                  }

@@ -454,7 +454,7 @@ function sprint_from_json(sprint){
     return self;
 }
 
-function fetch_sprints(settings, project_id, callback){
+function sprints_fetch(settings, project_id, callback){
     let url = build_sprints_url(settings.api_key, settings.root_url, project_id);
     axios.get(url).then(response => {
         console.log("versions");
