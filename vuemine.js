@@ -442,7 +442,7 @@ function stories_fetch(settings, project_id, sprint_id, callback){
         }));
 }
 
-function version_json_to_sprint(sprint){
+function sprint_from_json(sprint){
     let self = {
         id: sprint.id,
         title: sprint.name,
@@ -461,7 +461,7 @@ function fetch_sprints(settings, project_id, callback){
         console.log(response);
         let sprints = response.data.versions
             .filter(sprint => sprint.status == "open")
-            .map(version_json_to_sprint);
+            .map(sprint_from_json);
         callback(sprints);
     });
 }
