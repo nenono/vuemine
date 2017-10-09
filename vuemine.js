@@ -337,7 +337,7 @@ function array_sum(arr){
     return result;
 }
 
-function remove(arr, elm){
+function array_remove(arr, elm){
     let pos = arr.indexOf(elm);
     arr.splice(pos, 1);
 }

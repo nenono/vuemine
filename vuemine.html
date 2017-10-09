@@ -172,7 +172,7 @@
                  },
                  cancel: function(task){
                      console.log('cancel');
-                     if(!task.id){ remove(this.$parent.story.tasks, task); }
+                     if(!task.id){ array_remove(this.$parent.story.tasks, task); }
                      else{ task.is_editing = false; }
                  }
              },
