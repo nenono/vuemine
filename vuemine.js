@@ -352,7 +352,7 @@ function issue_remaining_hours(issue){
     return parseFloat(issue.estimated_hours);
 }
 
-function is_finished(status){
+function status_is_finished(status){
     switch(status.name){
     case 'done':
     case 'reject':
@@ -383,7 +383,7 @@ function new_issue(){
             else { issue_start(self, settings); }
         },
         done: (settings)=>issue_done(self, settings),
-        is_finished: ()=>is_finished(self.status),
+        is_finished: ()=>status_is_finished(self.status),
         save: (settings)=>{
             if(!self.id){ issue_create(self, settings); }
             else { issue_update(self, settings); }
