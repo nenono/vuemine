@@ -175,7 +175,7 @@ function build_current_user_url(api_key, root_url){
     return `${root_url}users/current.json?key=${api_key}`;
 }
 
-function fetch_current_user(settings, callback) {
+function user_fetch_current(settings, callback) {
     let url = build_current_user_url(settings.api_key, settings.root_url);
     axios.get(url).then(response => {
         console.log('user');
@@ -248,7 +248,7 @@ function issue_start(issue, settings){
 function issue_start_with_assign_to_me(issue, settings){
     console.log('issue start(with assign to me)');
     console.log(issue);
-    fetch_current_user(settings, (user) => {
+    user_fetch_current(settings, (user) => {
         let body = {
             'issue': {
                 'status_id': statuses.running.id,
