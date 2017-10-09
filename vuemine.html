@@ -102,7 +102,7 @@
              methods:{
                  load: function(){
                      let self = this;
-                     fetch_stories(settings, self.$parent.project.id, self.sprint.id, function(stories){
+                     stories_fetch(settings, self.$parent.project.id, self.sprint.id, function(stories){
                          self.sprint.stories = stories;
                      });
                  },

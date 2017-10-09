@@ -424,7 +424,7 @@ function stories_grouping_tasks(stories, tasks){
     });
 }
 
-function fetch_stories(settings, project_id, sprint_id, callback){
+function stories_fetch(settings, project_id, sprint_id, callback){
     let stories_url = build_stories_url(settings.api_key, settings.root_url, project_id, sprint_id);
     let tasks_url = build_tasks_url(settings.api_key, settings.root_url, project_id, sprint_id);
     axios.all([
