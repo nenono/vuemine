@@ -342,7 +342,7 @@ function array_remove(arr, elm){
     arr.splice(pos, 1);
 }
 
-function remaining_hours(issue){
+function issue_remaining_hours(issue){
     if(issue.is_finished()){
         return 0;
     }
@@ -374,7 +374,7 @@ function new_issue(){
         estimated_hours: 0,
         is_editing: false,
         project_id: null,
-        remaining_hours: ()=>remaining_hours(self),
+        remaining_hours: ()=>issue_remaining_hours(self),
         is_startable: ()=>issue_is_startable(self.status),
         is_doneable: ()=>issue_is_doneable(self.status),
         is_task: ()=> self.parent_id ? true: false,
