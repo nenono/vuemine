@@ -184,7 +184,7 @@ function fetch_current_user(settings, callback) {
     });
 };
 
-function convert_status(status){
+function status_from_json(status){
     let translated = ((japanese_name) => {
         switch(japanese_name){
         case '新規':
@@ -295,7 +295,7 @@ function issue_to_json(issue){
 }
 
 function issue_from_json(json, root_url, project_id){
-    let status = convert_status(json.status);
+    let status = status_from_json(json.status);
     return {
         id: json.id,
         number: json.id,
