@@ -392,7 +392,7 @@ function issue_new(){
     return self;
 }
 
-function add_task(story, project_id){
+function story_add_task(story, project_id){
     let task = issue_new();
     Object.assign(task, {
         is_editing: true,
