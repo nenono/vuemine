@@ -362,7 +362,7 @@ function status_is_finished(status){
     }
 }
 
-function new_issue(){
+function issue_new(){
     let self = {
         id: null,
         number: null,
@@ -393,7 +393,7 @@ function new_issue(){
 }
 
 function add_task(story, project_id){
-    let task = new_issue();
+    let task = issue_new();
     Object.assign(task, {
         is_editing: true,
         project_id: project_id,
@@ -404,7 +404,7 @@ function add_task(story, project_id){
 }
 
 function issue_json_to_task_or_story(root_url, issue, project_id){
-    let task = new_issue();
+    let task = issue_new();
     Object.assign(task, issue_from_json(issue, root_url, project_id));
     return task;
 }
