@@ -294,7 +294,7 @@ function issue_to_json(issue){
     return { issue: json };
 }
 
-function json_to_issue(json, root_url, project_id){
+function issue_from_json(json, root_url, project_id){
     let status = convert_status(json.status);
     return {
         id: json.id,
@@ -316,7 +316,7 @@ function issue_create(issue, settings){
     axios.post(url, body).then(response => {
         console.log('issue created.');
         console.log(response);
-        Object.assign(issue, json_to_issue(response.data.issue, settings.root_url, issue.project_id));
+        Object.assign(issue, issue_from_json(response.data.issue, settings.root_url, issue.project_id));
         issue.is_editing = false;
     });
 }
@@ -405,7 +405,7 @@ function add_task(story, project_id){
 
 function issue_json_to_task_or_story(root_url, issue, project_id){
     let task = new_issue();
-    Object.assign(task, json_to_issue(issue, root_url, project_id));
+    Object.assign(task, issue_from_json(issue, root_url, project_id));
     return task;
 }
 
