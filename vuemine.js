@@ -310,6 +310,12 @@ function issue_from_json(json, root_url, project_id){
     };
 }
 
+function issue_new_with_json(root_url, issue, project_id){
+    let task = issue_new();
+    Object.assign(task, issue_from_json(issue, root_url, project_id));
+    return task;
+}
+
 function issue_create(issue, settings){
     let url = build_issues_in_project_url(settings.api_key, settings.root_url, issue.project_id);
     let body = issue_to_json(issue);
@@ -403,12 +409,6 @@ function story_add_task(story, project_id){
     story.tasks.push(task);
 }
 
-function issue_json_to_task_or_story(root_url, issue, project_id){
-    let task = issue_new();
-    Object.assign(task, issue_from_json(issue, root_url, project_id));
-    return task;
-}
-
 function group_tasks_by_story(stories, tasks){
     let story_tasks = {};
     tasks.forEach(task=>{
@@ -435,8 +435,8 @@ function fetch_stories(settings, project_id, sprint_id, callback){
             console.log(res_stories);
             console.log("tasks");
             console.log(res_tasks);
-            let stories = res_stories.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x, project_id));
-            let tasks = res_tasks.data.issues.map(x => issue_json_to_task_or_story(settings.root_url, x, project_id));
+            let stories = res_stories.data.issues.map(x => issue_new_with_json(settings.root_url, x, project_id));
+            let tasks = res_tasks.data.issues.map(x => issue_new_with_json(settings.root_url, x, project_id));
             group_tasks_by_story(stories, tasks);
             callback(stories);
         }));
