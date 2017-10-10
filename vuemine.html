@@ -95,9 +95,13 @@
                  <span class="sprint-term">{{ sprint.start.toLocaleDateString() }} -&gt; {{ sprint.end.toLocaleDateString() }}</span>
                  <span class="sprint-status">[{{ sprint.remaining_hours().toFixed(1) }}]</span>
                  <span class="sprint-title">{{ sprint.title }}</span>
-                 <span><button v-on:click="reload()">reload</button></span>
+                 <button title="expand" v-show="!sprint.is_visible" v-on:click="expand()">&lt;&gt;</button>
+                 <button title="hide" v-show="sprint.is_visible" v-on:click="hide()">&gt;&lt;</button>
+                 <button v-on:click="reload()">reload</button>
                  <br />
-                 <story-item v-for="x in sprint.stories" v-bind:story="x" v-bind:statuses="statuses" :key="x.id" />
+                 <div v-show="sprint.is_visible">
+                     <story-item v-for="x in sprint.stories" v-bind:story="x" v-bind:statuses="statuses" :key="x.id" />
+                 </div>
              </div>`,
              methods:{
                  load: function(){
@@ -109,6 +113,12 @@
                  reload: function(){
                      this.sprint.stories = [];
                      this.load();
+                 },
+                 hide: function(){
+                     this.sprint.is_visible = false;
+                 },
+                 expand: function(){
+                     this.sprint.is_visible = true;
                  }
              },
              mounted: function(){
@@ -130,18 +140,28 @@
                  add_task: function(){
                      console.log('add_task');
                      story_add_task(this.story, this.$parent.$parent.project.id);
+                 },
+                 hide: function(){
+                     this.story.is_visible = false;
+                 },
+                 expand: function(){
+                     this.story.is_visible = true;
                  }
              },
              template: `<div class="story">
                  <span class="story-general">
                  <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
                      <button title="copy id"  v-on:click="copy(story.id)">@</button>
-                     <button title="add a task" v-on:click="add_task()">+</button>
+                     <button title="add new task" v-on:click="add_task()">+</button>
+                     <button title="expand" v-show="!story.is_visible" v-on:click="expand()">&lt;&gt;</button>
+                     <button title="hide" v-show="story.is_visible" v-on:click="hide()">&gt;&lt;</button>
                      <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
                      <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
                  </span>
-                     <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
+                 <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
+                 <span v-show="story.is_visible">
                      <task-item v-for="x in story.tasks" v-bind:task="x" v-bind:statuses="statuses" :key="x.id" />
+                 </span>
              </div>`
          });
          Vue.component('task-item', {

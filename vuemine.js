@@ -309,6 +309,7 @@ function issue_from_json(json, root_url, project_id){
         parent: null,
         estimated_hours: json.estimated_hours || 0,
         is_editing: false,
+        is_visible: !status_is_finished(status),
         project_id: project_id
     };
 }
@@ -383,6 +384,7 @@ function issue_new(){
         estimated_hours: 0,
         is_editing: false,
         project_id: null,
+        is_visible: true,
         remaining_hours: ()=>issue_remaining_hours(self),
         is_startable: ()=>issue_is_startable(self.status),
         is_doneable: ()=>issue_is_doneable(self.status),
@@ -452,6 +454,7 @@ function sprint_from_json(sprint){
         start: new Date(sprint.created_on),
         end: new Date(sprint.due_date),
         stories: [],
+        is_visible: true,
         remaining_hours: ()=> array_sum(self.stories.map((x) => x.remaining_hours()))
     };
     return self;
