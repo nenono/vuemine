@@ -152,7 +152,7 @@
                  <span class="story-general">
                  <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
                      <button title="copy id"  v-on:click="copy(story.id)">@</button>
-                     <button title="add a task" v-on:click="add_task()">+</button>
+                     <button title="add new task" v-on:click="add_task()">+</button>
                      <button title="expand" v-show="!story.is_visible" v-on:click="expand()">&lt;&gt;</button>
                      <button title="hide" v-show="story.is_visible" v-on:click="hide()">&gt;&lt;</button>
                      <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
