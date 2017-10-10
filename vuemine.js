@@ -95,7 +95,10 @@ let stub = {
 let statuses = {
     'new': {'id': 1, 'name': 'new', 'label': '新規'},
     'running': {'id': 2, 'name': 'running', 'label': '進行中'},
-    'done': {'id': 5, 'name': 'done', 'label': '終了'}
+    'review': {'id': 3, 'name': 'review', 'label': 'レビュー'},
+    'feedback': {'id': 4, 'name:': 'feedback', 'label': 'フィードバック'},
+    'done': {'id': 5, 'name': 'done', 'label': '終了'},
+    'reject': {'id': 6, 'name': 'reject', 'label': '却下'}
 };
 
 let trackers = {
