@@ -452,6 +452,7 @@ function sprint_from_json(sprint){
         start: new Date(sprint.created_on),
         end: new Date(sprint.due_date),
         stories: [],
+        is_visible: true,
         remaining_hours: ()=> array_sum(self.stories.map((x) => x.remaining_hours()))
     };
     return self;

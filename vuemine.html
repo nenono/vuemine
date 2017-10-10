@@ -95,9 +95,13 @@
                  <span class="sprint-term">{{ sprint.start.toLocaleDateString() }} -&gt; {{ sprint.end.toLocaleDateString() }}</span>
                  <span class="sprint-status">[{{ sprint.remaining_hours().toFixed(1) }}]</span>
                  <span class="sprint-title">{{ sprint.title }}</span>
-                 <span><button v-on:click="reload()">reload</button></span>
+                 <button title="expand" v-show="!sprint.is_visible" v-on:click="expand()">&lt;&gt;</button>
+                 <button title="hide" v-show="sprint.is_visible" v-on:click="hide()">&gt;&lt;</button>
+                 <button v-on:click="reload()">reload</button>
                  <br />
-                 <story-item v-for="x in sprint.stories" v-bind:story="x" v-bind:statuses="statuses" :key="x.id" />
+                 <div v-show="sprint.is_visible">
+                     <story-item v-for="x in sprint.stories" v-bind:story="x" v-bind:statuses="statuses" :key="x.id" />
+                 </div>
              </div>`,
              methods:{
                  load: function(){
@@ -109,6 +113,12 @@
                  reload: function(){
                      this.sprint.stories = [];
                      this.load();
+                 },
+                 hide: function(){
+                     this.sprint.is_visible = false;
+                 },
+                 expand: function(){
+                     this.sprint.is_visible = true;
                  }
              },
              mounted: function(){
