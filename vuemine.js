@@ -309,6 +309,7 @@ function issue_from_json(json, root_url, project_id){
         parent: null,
         estimated_hours: json.estimated_hours || 0,
         is_editing: false,
+        is_visible: !status_is_finished(status),
         project_id: project_id
     };
 }
