@@ -383,6 +383,7 @@ function issue_new(){
         estimated_hours: 0,
         is_editing: false,
         project_id: null,
+        is_visible: true,
         remaining_hours: ()=>issue_remaining_hours(self),
         is_startable: ()=>issue_is_startable(self.status),
         is_doneable: ()=>issue_is_doneable(self.status),

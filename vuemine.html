@@ -140,6 +140,12 @@
                  add_task: function(){
                      console.log('add_task');
                      story_add_task(this.story, this.$parent.$parent.project.id);
+                 },
+                 hide: function(){
+                     this.story.is_visible = false;
+                 },
+                 expand: function(){
+                     this.story.is_visible = true;
                  }
              },
              template: `<div class="story">
@@ -147,11 +153,15 @@
                  <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
                      <button title="copy id"  v-on:click="copy(story.id)">@</button>
                      <button title="add a task" v-on:click="add_task()">+</button>
+                     <button title="expand" v-show="!story.is_visible" v-on:click="expand()">&lt;&gt;</button>
+                     <button title="hide" v-show="story.is_visible" v-on:click="hide()">&gt;&lt;</button>
                      <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
                      <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
                  </span>
-                     <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
+                 <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
+                 <span v-show="story.is_visible">
                      <task-item v-for="x in story.tasks" v-bind:task="x" v-bind:statuses="statuses" :key="x.id" />
+                 </span>
              </div>`
          });
          Vue.component('task-item', {
