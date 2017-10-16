@@ -101,10 +101,6 @@ let statuses = {
     'reject': {'id': 6, 'name': 'reject', 'label': '却下'}
 };
 
-let trackers = {
-    task: {id: 3, name: 'task', label: 'タスク'}
-};
-
 function clipboard_copy(str){
     // add temporary DOM node
     let node = document.createElement('div');
@@ -141,6 +137,9 @@ function parse_query(query){
     }
 }
 
+function build_trackers_url(api_key, root_url){
+    return `${root_url}trackers.json?key=${api_key}&limit=100`;
+}
 
 function build_sprints_url(api_key, root_url, project_id){
     return `${root_url}projects/${project_id}/versions.json?key=${api_key}&limit=100`;
@@ -186,6 +185,68 @@ function user_fetch_current(settings, callback) {
         callback(response.data.user);
     });
 };
+
+let _trackers = [
+    {
+        id: 2,
+        name: "フィーチャ"
+    },
+    {
+        id: 6,
+        name: "バグ"
+    },
+    {
+        id: 7,
+        name: "レビュー"
+    },
+    {
+        id: 8,
+        name: "調査"
+    },
+    {
+        id: 9,
+        name: "対話"
+    },
+    {
+        id: 10,
+        name: "ドキュメント"
+    },
+    {
+        id: 11,
+        name: "環境構築"
+    },
+    {
+        id: 12,
+        name: "社外作業"
+    },
+    {
+        id: 3,
+        name: "タスク"
+    },
+    {
+        id: 13,
+        name: "検討事項"
+    },
+    {
+        id: 14,
+        name: "リリースバグ"
+    },
+    {
+        id: 15,
+        name: "イベント"
+    }
+];
+let tracker_task = {id: 3, name: 'task', label: 'タスク'};
+
+let trackers = function() {
+    return _trackers.map((x)=> ({
+        id: x.id,
+        name: x.name,
+        label: x.name
+    }));
+};
+
+
 
 function status_from_json(status){
     let translated = ((japanese_name) => {
@@ -291,7 +352,7 @@ function issue_to_json(issue){
         status_id: issue.status.id,
         parent_issue_id: issue.parent ? issue.parent.id : null,
         estimated_hours: issue.estimated_hours || 0,
-        tracker_id: trackers.task.id
+        tracker_id: tracker_task.id
     };
     if(issue.id){ json["id"] = issue.id; }
     return { issue: json };
@@ -445,6 +506,10 @@ function stories_fetch(settings, project_id, sprint_id, callback){
             stories_grouping_tasks(stories, tasks);
             callback(stories);
         }));
+}
+
+function sprint_add_story(sprint, project_id){
+    // TODO
 }
 
 function sprint_from_json(sprint){
