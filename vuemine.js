@@ -101,10 +101,6 @@ let statuses = {
     'reject': {'id': 6, 'name': 'reject', 'label': '却下'}
 };
 
-let trackers = {
-    task: {id: 3, name: 'task', label: 'タスク'}
-};
-
 function clipboard_copy(str){
     // add temporary DOM node
     let node = document.createElement('div');
@@ -141,6 +137,9 @@ function parse_query(query){
     }
 }
 
+function build_trackers_url(api_key, root_url){
+    return `${root_url}trackers.json?key=${api_key}&limit=100`;
+}
 
 function build_sprints_url(api_key, root_url, project_id){
     return `${root_url}projects/${project_id}/versions.json?key=${api_key}&limit=100`;
@@ -186,6 +185,44 @@ function user_fetch_current(settings, callback) {
         callback(response.data.user);
     });
 };
+
+function trackers_fetch(settings, callback){
+    let url = build_trackers_url(settings.api_key, settings.root_url);
+    axios.get(url).then(response => {
+        console.log("trackers");
+        console.log(response);
+        callback(response.data.trackers);
+    });
+}
+
+var _trackers = null;
+let trackers = function(settings, callback) {
+    if(_trackers){ callback(_trackers); return;  }
+    trackers_fetch(settings, (json) => {
+        _trackers = json.map((x)=> ({
+            id: x.id,
+            name: x.name,
+            label: x.name
+        }));
+        callback(_trackers);
+    });
+};
+
+
+function trackers_for_stories(trackers){
+    return trackers.filter(x => x.name != 'タスク');
+}
+
+let tracker_task = () => {
+    if(!_trackers){ throw "trackers are not initialized."; }
+    return _trackers.find(x => x.name == 'タスク');
+}
+
+
+function tracker_from_json(json){
+    return {id: json.id, name: json.name, label: json.name};
+}
+
 
 function status_from_json(status){
     let translated = ((japanese_name) => {
@@ -291,9 +328,10 @@ function issue_to_json(issue){
         status_id: issue.status.id,
         parent_issue_id: issue.parent ? issue.parent.id : null,
         estimated_hours: issue.estimated_hours || 0,
-        tracker_id: trackers.task.id
+        tracker_id: issue.is_task() ? tracker_task().id : issue.tracker.id
     };
     if(issue.id){ json["id"] = issue.id; }
+    if(issue.version_id){ json["fixed_version_id"] = issue.version_id; }
     return { issue: json };
 }
 
@@ -304,9 +342,11 @@ function issue_from_json(json, root_url, project_id){
         number: json.id,
         title: json.subject,
         status: status,
+        tracker: tracker_from_json(json.tracker),
         url: build_issue_page_url(root_url, json.id),
         parent_id: json.parent ? json.parent.id : null,
         parent: null,
+        version_id: json.fixed_version ? json.fixed_version.id : null,
         estimated_hours: json.estimated_hours || 0,
         is_editing: false,
         is_visible: !status_is_finished(status),
@@ -384,6 +424,7 @@ function issue_new(){
         estimated_hours: 0,
         is_editing: false,
         project_id: null,
+        version_id: null,
         is_visible: true,
         remaining_hours: ()=>issue_remaining_hours(self),
         is_startable: ()=>issue_is_startable(self.status),
@@ -445,6 +486,16 @@ function stories_fetch(settings, project_id, sprint_id, callback){
             stories_grouping_tasks(stories, tasks);
             callback(stories);
         }));
+}
+
+function sprint_add_story(sprint, project_id){
+    let story = issue_new();
+    Object.assign(story, {
+        is_editing: true,
+        project_id: project_id,
+        version_id: sprint.id
+    });
+    sprint.stories.push(story);
 }
 
 function sprint_from_json(sprint){

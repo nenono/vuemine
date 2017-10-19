@@ -52,7 +52,7 @@
             <button v-on:click="show">show</button>
         </div>
         <div id="projects">
-            <project-item v-for="x in projects" v-bind:project="x" v-bind:statuses="statuses" :key="x.id" />
+            <project-item v-for="x in projects" v-bind:project="x" v-bind:statuses="statuses" v-bind:trackers="trackers" :key="x.id" />
         </div>
         <script type="text/javascript">
          let settings = new Vue({
@@ -66,12 +66,12 @@
          });
 
          Vue.component('project-item', {
-             props: ['project', 'statuses'],
+             props: ['project', 'statuses', 'trackers'],
              template: `<div class="project">
                  <a v-bind:href="project.url">
                      <span class="project-title">{{ project.title }}</span>
                  </a><br />
-                 <sprint-item v-for="x in project.sprints" v-bind:sprint="x" v-bind:statuses="statuses" :key="x.id" />
+                 <sprint-item v-for="x in project.sprints" v-bind:sprint="x" v-bind:statuses="statuses" v-bind:trackers="trackers" :key="x.id" />
              </div>`,
              methods:{
                  load: function(){
@@ -90,17 +90,18 @@
          });
 
          Vue.component('sprint-item', {
-             props: ['sprint', 'statuses'],
+             props: ['sprint', 'statuses', 'trackers'],
              template: `<div class="sprint">
                  <span class="sprint-term">{{ sprint.start.toLocaleDateString() }} -&gt; {{ sprint.end.toLocaleDateString() }}</span>
                  <span class="sprint-status">[{{ sprint.remaining_hours().toFixed(1) }}]</span>
                  <span class="sprint-title">{{ sprint.title }}</span>
+                 <button title="add new story" v-on:click="add_story()">+</button>
                  <button title="expand" v-show="!sprint.is_visible" v-on:click="expand()">&lt;&gt;</button>
                  <button title="hide" v-show="sprint.is_visible" v-on:click="hide()">&gt;&lt;</button>
                  <button v-on:click="reload()">reload</button>
                  <br />
                  <div v-show="sprint.is_visible">
-                     <story-item v-for="x in sprint.stories" v-bind:story="x" v-bind:statuses="statuses" :key="x.id" />
+                     <story-item v-for="x in sprint.stories" v-bind:story="x" v-bind:statuses="statuses" v-bind:trackers="trackers" :key="x.id" />
                  </div>
              </div>`,
              methods:{
@@ -119,14 +120,18 @@
                  },
                  expand: function(){
                      this.sprint.is_visible = true;
-                 }
+                 },
+                 add_story: function(){
+                     console.log('add_story');
+                     sprint_add_story(this.sprint, this.$parent.project.id);
+                 },
              },
              mounted: function(){
                  this.load();
              }
          });
          Vue.component('story-item', {
-             props: ['story', 'statuses'],
+             props: ['story', 'statuses', 'trackers'],
              methods: {
                  done: function(story) {
                      console.log('story.done');
@@ -146,19 +151,49 @@
                  },
                  expand: function(){
                      this.story.is_visible = true;
+                 },
+                 save: function(story){
+                     console.log('save');
+                     console.log(story);
+                     story.save(settings);
+                 },
+                 edit: function(story){
+                     console.log('edit');
+                     story.is_editing = true;
+                 },
+                 cancel: function(story){
+                     console.log('cancel');
+                     if(!story.id){ array_remove(this.$parent.sprint.stories, story); }
+                     else{ story.is_editing = false; }
                  }
              },
              template: `<div class="story">
-                 <span class="story-general">
-                 <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
-                     <button title="copy id"  v-on:click="copy(story.id)">@</button>
-                     <button title="add new task" v-on:click="add_task()">+</button>
-                     <button title="expand" v-show="!story.is_visible" v-on:click="expand()">&lt;&gt;</button>
-                     <button title="hide" v-show="story.is_visible" v-on:click="hide()">&gt;&lt;</button>
-                     <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
-                     <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
+                 <span v-show="story.is_editing">
+                     <span class="story-general">
+                         <select v-model="story.tracker">
+                             <option v-for='tracker in trackers' v-bind:value='tracker' :key="tracker.id">{{ tracker.label }}</option>
+                         </select>
+                         | <select v-model="story.status">
+                             <option v-for='status in statuses' v-bind:value='status' :key="status.id">{{ status.label }}</option>
+                         </select>
+                     </span>
+                     <input class="input-title" v-model='story.title' placeholder='title' />
+                     <button v-on:click="save(story)">save</button>
+                     <button v-on:click="cancel(story)">cancel</button>
                  </span>
-                 <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
+                 <span v-show="!story.is_editing">
+                     <span class="story-general">
+                         <a class="story-number" v-bind:href="story.url">#{{ story.number }}</a>
+                         <button title="copy id"  v-on:click="copy(story.id)">@</button>
+                         <button title="edit" v-on:click="edit(story)">*</button>
+                         <button title="add new task" v-on:click="add_task()">+</button>
+                         <button title="expand" v-show="!story.is_visible" v-on:click="expand()">&lt;&gt;</button>
+                         <button title="hide" v-show="story.is_visible" v-on:click="hide()">&gt;&lt;</button>
+                         <span v-bind:class="\'story-status \' + story.status.name">{{ story.status.label }} | {{ story.remaining_hours().toFixed(1) }}</span>
+                         <span v-show="story.is_doneable()"><button v-on:click="done(story)">done</button></span>
+                     </span>
+                     <span v-bind:class="\'story-title \' + story.status.name">{{ story.title }}</span>
+                 </span>
                  <span v-show="story.is_visible">
                      <task-item v-for="x in story.tasks" v-bind:task="x" v-bind:statuses="statuses" :key="x.id" />
                  </span>
@@ -224,11 +259,12 @@
 
          let projects = new Vue({
              el: '#projects',
-             data: { 'projects': [], 'statuses': statuses }
+             data: { 'projects': [], 'statuses': statuses, 'trackers': [] }
          });
 
          if(settings.root_url && settings.project_ids && settings.api_key){
              projects.projects = projects_new(settings.root_url, settings.project_ids);
+             trackers(settings, (trackers) => { projects.trackers = trackers_for_stories(trackers); });
          }
         </script>
     </body>
