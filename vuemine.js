@@ -358,6 +358,7 @@ function issue_to_json(issue){
         tracker_id: issue.is_task() ? tracker_task.id : issue.tracker.id
     };
     if(issue.id){ json["id"] = issue.id; }
+    if(issue.version_id){ json["fixed_version_id"] = issue.version_id; }
     return { issue: json };
 }
 
@@ -372,6 +373,7 @@ function issue_from_json(json, root_url, project_id){
         url: build_issue_page_url(root_url, json.id),
         parent_id: json.parent ? json.parent.id : null,
         parent: null,
+        version_id: json.fixed_version ? json.fixed_version.id : null,
         estimated_hours: json.estimated_hours || 0,
         is_editing: false,
         is_visible: !status_is_finished(status),
@@ -449,6 +451,7 @@ function issue_new(){
         estimated_hours: 0,
         is_editing: false,
         project_id: null,
+        version_id: null,
         is_visible: true,
         remaining_hours: ()=>issue_remaining_hours(self),
         is_startable: ()=>issue_is_startable(self.status),
@@ -513,7 +516,13 @@ function stories_fetch(settings, project_id, sprint_id, callback){
 }
 
 function sprint_add_story(sprint, project_id){
-    // TODO
+    let story = issue_new();
+    Object.assign(story, {
+        is_editing: true,
+        project_id: project_id,
+        version_id: sprint.id
+    });
+    sprint.stories.push(story);
 }
 
 function sprint_from_json(sprint){
