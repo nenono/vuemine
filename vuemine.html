@@ -259,11 +259,12 @@
 
          let projects = new Vue({
              el: '#projects',
-             data: { 'projects': [], 'statuses': statuses, 'trackers': trackers() }
+             data: { 'projects': [], 'statuses': statuses, 'trackers': [] }
          });
 
          if(settings.root_url && settings.project_ids && settings.api_key){
              projects.projects = projects_new(settings.root_url, settings.project_ids);
+             trackers(settings, (trackers) => { projects.trackers = trackers_for_stories(trackers); });
          }
         </script>
     </body>

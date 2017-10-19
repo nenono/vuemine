@@ -186,65 +186,38 @@ function user_fetch_current(settings, callback) {
     });
 };
 
-let _trackers = [
-    {
-        id: 2,
-        name: "フィーチャ"
-    },
-    {
-        id: 6,
-        name: "バグ"
-    },
-    {
-        id: 7,
-        name: "レビュー"
-    },
-    {
-        id: 8,
-        name: "調査"
-    },
-    {
-        id: 9,
-        name: "対話"
-    },
-    {
-        id: 10,
-        name: "ドキュメント"
-    },
-    {
-        id: 11,
-        name: "環境構築"
-    },
-    {
-        id: 12,
-        name: "社外作業"
-    },
-    {
-        id: 3,
-        name: "タスク"
-    },
-    {
-        id: 13,
-        name: "検討事項"
-    },
-    {
-        id: 14,
-        name: "リリースバグ"
-    },
-    {
-        id: 15,
-        name: "イベント"
-    }
-];
-let tracker_task = {id: 3, name: 'task', label: 'タスク'};
+function trackers_fetch(settings, callback){
+    let url = build_trackers_url(settings.api_key, settings.root_url);
+    axios.get(url).then(response => {
+        console.log("trackers");
+        console.log(response);
+        callback(response.data.trackers);
+    });
+}
 
-let trackers = function() {
-    return _trackers.map((x)=> ({
-        id: x.id,
-        name: x.name,
-        label: x.name
-    }));
+var _trackers = null;
+let trackers = function(settings, callback) {
+    if(_trackers){ callback(_trackers); return;  }
+    trackers_fetch(settings, (json) => {
+        _trackers = json.map((x)=> ({
+            id: x.id,
+            name: x.name,
+            label: x.name
+        }));
+        callback(_trackers);
+    });
 };
+
+
+function trackers_for_stories(trackers){
+    return trackers.filter(x => x.name != 'タスク');
+}
+
+let tracker_task = () => {
+    if(!_trackers){ throw "trackers are not initialized."; }
+    return _trackers.find(x => x.name == 'タスク');
+}
+
 
 function tracker_from_json(json){
     return {id: json.id, name: json.name, label: json.name};
@@ -355,7 +328,7 @@ function issue_to_json(issue){
         status_id: issue.status.id,
         parent_issue_id: issue.parent ? issue.parent.id : null,
         estimated_hours: issue.estimated_hours || 0,
-        tracker_id: issue.is_task() ? tracker_task.id : issue.tracker.id
+        tracker_id: issue.is_task() ? tracker_task().id : issue.tracker.id
     };
     if(issue.id){ json["id"] = issue.id; }
     if(issue.version_id){ json["fixed_version_id"] = issue.version_id; }
