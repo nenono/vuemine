@@ -355,7 +355,7 @@ function issue_to_json(issue){
         status_id: issue.status.id,
         parent_issue_id: issue.parent ? issue.parent.id : null,
         estimated_hours: issue.estimated_hours || 0,
-        tracker_id: tracker_task.id
+        tracker_id: issue.is_task() ? tracker_task.id : issue.tracker.id
     };
     if(issue.id){ json["id"] = issue.id; }
     return { issue: json };
