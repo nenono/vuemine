@@ -52,7 +52,7 @@
             <button v-on:click="show">show</button>
         </div>
         <div id="projects">
-            <project-item v-for="x in projects" v-bind:project="x" v-bind:statuses="statuses" :key="x.id" />
+            <project-item v-for="x in projects" v-bind:project="x" v-bind:statuses="statuses" v-bind:trackers="trackers" :key="x.id" />
         </div>
         <script type="text/javascript">
          let settings = new Vue({

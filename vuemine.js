@@ -246,6 +246,9 @@ let trackers = function() {
     }));
 };
 
+function tracker_from_json(json){
+    return {id: json.id, name: json.name, label: json.name};
+}
 
 
 function status_from_json(status){
@@ -365,6 +368,7 @@ function issue_from_json(json, root_url, project_id){
         number: json.id,
         title: json.subject,
         status: status,
+        tracker: tracker_from_json(json.tracker),
         url: build_issue_page_url(root_url, json.id),
         parent_id: json.parent ? json.parent.id : null,
         parent: null,
