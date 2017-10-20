@@ -20,11 +20,25 @@ A viewer of redmine multiple projects in web browser.
 3. Input redmine api key.
 4. Press `show` button.
 
-### Change status
-1. Press start button when you starting a task.
-    * If a parent of the task is status `new`, it is started automatically.
-2. Press done button with the task when you finish a task.
-3. Press done button with the story when you finish a story.
+### Sprint Operations
+* `><`: hide stories in the sprint
+* `<>`: show stories in the sprint
+* `+`: add story to the sprint
+* `reload`: reload the sprint
+
+### Story Operations
+* `><`: hide tasks in the story
+* `<>`: show tasks in the story
+* `*`: edit the story
+* `+`: add a new task to the story
+* `start`: start the story
+* `done`: finish the story
+
+### Task Operations
+* `*`: edit the story
+* `start`: start the task
+    * If a parent of the task is status `new`, it is started automatically
+* `done`: finish the task
 
 ## 実装方針とか
 * Redmine+backlogsでできない機能や、複数プロジェクトの全体状況把握に役立つ機能は優先。
