@@ -326,7 +326,7 @@ function issue_to_json(issue){
     let json = {
         subject: issue.title,
         status_id: issue.status.id,
-        parent_issue_id: issue.parent ? issue.parent.id : null,
+        parent_issue_id: issue.parent_id,
         estimated_hours: issue.estimated_hours || 0,
         tracker_id: issue.is_task() ? tracker_task().id : issue.tracker.id
     };
@@ -345,7 +345,6 @@ function issue_from_json(json, root_url, project_id){
         tracker: tracker_from_json(json.tracker),
         url: build_issue_page_url(root_url, json.id),
         parent_id: json.parent ? json.parent.id : null,
-        parent: null,
         version_id: json.fixed_version ? json.fixed_version.id : null,
         estimated_hours: json.estimated_hours || 0,
         is_editing: false,
